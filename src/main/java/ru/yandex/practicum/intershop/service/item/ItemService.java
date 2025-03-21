@@ -14,6 +14,8 @@ public interface ItemService {
 
     ItemFullDto getItemById(Long id);
 
+    Long getItemCount();
+
     void saveItem(ItemFullDto itemFullDto);
 
 }
