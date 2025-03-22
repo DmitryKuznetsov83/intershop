@@ -3,6 +3,8 @@ package ru.yandex.practicum.intershop.service.item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.intershop.configuration.IntershopConfiguration;
 import ru.yandex.practicum.intershop.dto.ItemFullDto;
@@ -14,6 +16,7 @@ import ru.yandex.practicum.intershop.utils.StringUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -58,5 +61,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void saveItem(ItemFullDto itemFullDto) {
 
+    }
+
+    @Override
+    public Optional<byte[]> findImageByPostId(long itemId) {
+        return itemRepository.findImageByItemId(itemId);
     }
 }

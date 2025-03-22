@@ -20,7 +20,7 @@ public class ItemRepositoryJdbc {
 
     public void saveAll(List<Item> items) {
         namedParameterJdbcTemplate.batchUpdate(
-                "INSERT INTO item (title, description, price) VALUES (:title, :description, :price)",
+                "INSERT INTO item (title, description, price, image, has_image) VALUES (:title, :description, :price, :image, :hasImage)",
                 SqlParameterSourceUtils.createBatch(items)
         );
     }

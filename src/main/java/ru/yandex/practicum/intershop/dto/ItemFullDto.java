@@ -15,5 +15,14 @@ public class ItemFullDto {
     private String title;
     private String description;
     private Integer price;
+    private Boolean hasImage;
+
+    public String getImgPath() {
+        if (hasImage) {
+            return "items/" + id + "/image";
+        } else {
+            return "images/no_image.jpeg";
+        }
+    }
 
 }

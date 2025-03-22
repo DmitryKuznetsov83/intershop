@@ -7,6 +7,7 @@ import ru.yandex.practicum.intershop.dto.PageDto;
 import ru.yandex.practicum.intershop.emun.Sorting;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemService {
 
@@ -18,4 +19,5 @@ public interface ItemService {
 
     void saveItem(ItemFullDto itemFullDto);
 
+    Optional<byte[]> findImageByPostId(long itemId);
 }

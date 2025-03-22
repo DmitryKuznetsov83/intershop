@@ -10,7 +10,11 @@ import java.util.stream.Collectors;
 public class ItemMapper {
 
     public static ItemFullDto mapToItemFullDto(Item itemModel) {
-        return new ItemFullDto(itemModel.getId(), itemModel.getTitle(), itemModel.getDescription(), itemModel.getPrice());
+        return new ItemFullDto(itemModel.getId(),
+                itemModel.getTitle(),
+                itemModel.getDescription(),
+                itemModel.getPrice(),
+                itemModel.isHasImage());
     }
 
     public static List<ItemFullDto> mapToItemFullDtoList(List<Item> itemsModel) {

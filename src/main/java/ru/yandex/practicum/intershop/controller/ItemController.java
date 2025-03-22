@@ -3,9 +3,12 @@ package ru.yandex.practicum.intershop.controller;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -21,6 +24,7 @@ import ru.yandex.practicum.intershop.emun.Sorting;
 import ru.yandex.practicum.intershop.service.item.ItemService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(path = "/items/{itemId}")
@@ -39,6 +43,20 @@ public class ItemController {
         ItemFullDto item = itemService.getItemById(itemId);
         model.addAttribute("item", item);
         return "item";
+    }
+
+    // IMAGES
+    @GetMapping("/image")
+    public ResponseEntity<ByteArrayResource> getImage(@PathVariable long itemId) {
+        Optional<byte[]> image = itemService.findImageByPostId(itemId);
+        if (image.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        ByteArrayResource resource = new ByteArrayResource(image.get());
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(resource);
     }
 
 }
