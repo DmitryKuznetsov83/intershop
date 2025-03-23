@@ -9,14 +9,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ItemFullDto {
+public class ItemDto {
 
     private Long id;
     private String title;
     private String description;
     private Integer price;
     private Boolean hasImage;
-    private Integer countInCart;
+    private Integer quantity;
 
     public String getImgPath() {
         if (hasImage) {
@@ -26,8 +26,8 @@ public class ItemFullDto {
         }
     }
 
-    public Integer getCount() {
-        return countInCart;
+    public Integer getSum() {
+        return price * quantity;
     }
 
 }

@@ -2,7 +2,8 @@ package ru.yandex.practicum.intershop.service.cart;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.intershop.dto.ItemFullDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.emun.CartAction;
 import ru.yandex.practicum.intershop.mapper.ItemMapper;
 import ru.yandex.practicum.intershop.model.CartItem;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.repository.CartRepositoryJpa;
 import ru.yandex.practicum.intershop.repository.ItemRepositoryJpa;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -27,6 +29,7 @@ public class CartServiceImpl implements CartService {
 
 
     @Override
+    @Transactional
     public void changeCart(Long itemId, CartAction operation) {
         Item item = itemRepositoryJpa.findById(itemId)
                 .orElseThrow(() -> new NoSuchElementException("Товар с id " + itemId + " не найден"));
@@ -51,7 +54,13 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public List<ItemFullDto> getCartItems() {
-        return ItemMapper.mapToItemFullDtoList(cartRepositoryJpa.findAll().stream().map(CartItem::getItem).toList());
+    @Transactional(readOnly = true)
+    public List<ItemDto> getCartItems() {
+        return cartRepositoryJpa.findAll()
+                .stream()
+                .map(CartItem::getItem)
+                .map(ItemMapper::mapToItemDto)
+                .sorted(Comparator.comparingLong(ItemDto::getId))
+                .toList();
     }
 }

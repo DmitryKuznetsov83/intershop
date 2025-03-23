@@ -24,7 +24,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleIllegalArgumentException(IllegalArgumentException ex, Model model) {
-        model.addAttribute("errors", List.of("Некорретный аргумент: " + ex.getMessage()));
+        model.addAttribute("errors", List.of("Некорректный аргумент: " + ex.getMessage()));
+        return "page-400.html";
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleIllegalStateException(IllegalStateException ex, Model model) {
+        model.addAttribute("errors", List.of("Некорректный запрос: " + ex.getMessage()));
         return "page-400.html";
     }
 

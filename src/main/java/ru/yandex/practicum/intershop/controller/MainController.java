@@ -11,7 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.intershop.configuration.IntershopConfiguration;
-import ru.yandex.practicum.intershop.dto.ItemFullDto;
+import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
 import ru.yandex.practicum.intershop.dto.PagingDto;
 import ru.yandex.practicum.intershop.emun.CartAction;
@@ -56,8 +56,8 @@ public class MainController {
             default -> Sort.unsorted();
         };
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sort);
-        PageDto<ItemFullDto> page = itemService.getItems(search, pageable);
-        List<List<ItemFullDto>> partitionedItems = ListUtils.partition(page.content(), intershopConfiguration.getCellInRow());
+        PageDto<ItemDto> page = itemService.getItems(search, pageable);
+        List<List<ItemDto>> partitionedItems = ListUtils.partition(page.content(), intershopConfiguration.getCellInRow());
         PagingDto pagingDto = new PagingDto(pageSize, pageNumber, page.hasPrevious(), page.hasNext());
 
         model.addAttribute("pageSizeOptions", intershopConfiguration.getPagingSizeOptions());

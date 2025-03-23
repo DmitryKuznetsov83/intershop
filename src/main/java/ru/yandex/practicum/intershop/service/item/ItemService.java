@@ -1,23 +1,18 @@
 package ru.yandex.practicum.intershop.service.item;
 
 import org.springframework.data.domain.Pageable;
-import ru.yandex.practicum.intershop.dto.ItemFullDto;
-import ru.yandex.practicum.intershop.dto.ItemShortDto;
+import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
-import ru.yandex.practicum.intershop.emun.Sorting;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface ItemService {
 
-    PageDto<ItemFullDto> getItems(String search, Pageable pageable);
+    PageDto<ItemDto> getItems(String search, Pageable pageable);
 
-    ItemFullDto getItemById(Long id);
+    ItemDto getItemById(Long id);
 
     Long getItemCount();
-
-    void saveItem(ItemFullDto itemFullDto);
 
     Optional<byte[]> findImageByPostId(long itemId);
 }

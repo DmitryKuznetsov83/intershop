@@ -7,6 +7,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.repository.ItemRepositoryJdbc;
@@ -33,6 +34,7 @@ public class InitialLoaderServiceImpl implements InitialLoaderService {
     }
 
     @Override
+    @Transactional
     public void load() {
         List<String[]> csvRows = getCsvRows();
         List<Item> items = csvRows

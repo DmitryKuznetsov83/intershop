@@ -1,15 +1,13 @@
 package ru.yandex.practicum.intershop.controller;
 
-import org.hibernate.mapping.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.intershop.dto.ItemFullDto;
+import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.emun.CartAction;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 
-import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -25,9 +23,9 @@ public class CartController {
 
     @GetMapping
     public String getCart(Model model) {
-        List<ItemFullDto> cartItems = cartService.getCartItems();
+        List<ItemDto> cartItems = cartService.getCartItems();
         model.addAttribute("items", cartItems);
-        model.addAttribute("total", cartItems.stream().map(ItemFullDto::getPrice).reduce(0, Integer::sum));
+        model.addAttribute("total", cartItems.stream().map(ItemDto::getPrice).reduce(0, Integer::sum));
         model.addAttribute("empty", cartItems.isEmpty());
         return "cart";
     }

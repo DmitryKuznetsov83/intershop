@@ -3,11 +3,10 @@ package ru.yandex.practicum.intershop.service.item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.intershop.configuration.IntershopConfiguration;
-import ru.yandex.practicum.intershop.dto.ItemFullDto;
+import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
 import ru.yandex.practicum.intershop.mapper.ItemMapper;
 import ru.yandex.practicum.intershop.model.Item;
@@ -29,7 +28,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public PageDto<ItemFullDto> getItems(String search, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public PageDto<ItemDto> getItems(String search, Pageable pageable) {
         Page<Item> page;
         if (StringUtils.isNullOrBlank(search)) {
             page = itemRepository.findAll(pageable);
@@ -38,9 +38,11 @@ public class ItemServiceImpl implements ItemService {
             page = itemRepository.findAllByTitleIsLikeIgnoreCaseOrDescriptionIsLikeIgnoreCase(searchPattern, searchPattern, pageable);
         }
 
-        List<ItemFullDto> itemFullDtos = ItemMapper.mapToItemFullDtoList(page.stream().toList());
+        List<ItemDto> itemDtos = page.stream()
+                .map(ItemMapper::mapToItemDto)
+                .toList();
 
-        return new PageDto<>(itemFullDtos,
+        return new PageDto<>(itemDtos,
                 page.getTotalPages(),
                 page.getTotalElements(),
                 page.hasNext(),
@@ -48,22 +50,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemFullDto getItemById(Long id) {
-        return ItemMapper.mapToItemFullDto(itemRepository.findById(id)
+    @Transactional(readOnly = true)
+    public ItemDto getItemById(Long id) {
+        return ItemMapper.mapToItemDto(itemRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Товар с id " + id + " не найден")));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long getItemCount() {
         return itemRepository.count();
     }
 
     @Override
-    public void saveItem(ItemFullDto itemFullDto) {
-
-    }
-
-    @Override
+    @Transactional(readOnly = true)
     public Optional<byte[]> findImageByPostId(long itemId) {
         return itemRepository.findImageByItemId(itemId);
     }
