@@ -1,5 +1,6 @@
 package ru.yandex.practicum.intershop.controller;
 
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -31,14 +32,14 @@ public class ItemController {
     }
 
     @GetMapping()
-    public String getItem(Model model, @PathVariable Long itemId) {
+    public String getItem(Model model, @PathVariable @Positive Long itemId) {
         ItemDto item = itemService.getItemById(itemId);
         model.addAttribute("item", item);
         return "item";
     }
 
     @PostMapping()
-    public String changeCart(@PathVariable Long itemId,
+    public String changeCart(@PathVariable @Positive Long itemId,
                              @RequestParam CartAction action) {
         cartService.changeCart(itemId, action);
         return "redirect:/items/" + itemId;
@@ -46,7 +47,7 @@ public class ItemController {
 
     // IMAGES
     @GetMapping("/image")
-    public ResponseEntity<ByteArrayResource> getImage(@PathVariable long itemId) {
+    public ResponseEntity<ByteArrayResource> getImage(@PathVariable @Positive Long itemId) {
         Optional<byte[]> image = itemService.findImageByPostId(itemId);
         if (image.isEmpty()) {
             return ResponseEntity.notFound().build();

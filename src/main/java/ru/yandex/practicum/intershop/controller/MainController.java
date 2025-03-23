@@ -70,7 +70,7 @@ public class MainController {
     }
 
     @PostMapping("/{itemId}")
-    public String changeCart(@PathVariable Long itemId,
+    public String changeCart(@PathVariable @Positive Long itemId,
                              @RequestParam CartAction action) {
         cartService.changeCart(itemId, action);
         return "redirect:/main/items";
