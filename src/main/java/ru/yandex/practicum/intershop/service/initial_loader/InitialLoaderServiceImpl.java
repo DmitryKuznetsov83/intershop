@@ -36,8 +36,26 @@ public class InitialLoaderServiceImpl implements InitialLoaderService {
     @Override
     @Transactional
     public void load() {
+        List<Item> items = createItems();
+        itemRepositoryJdbc.saveAll(items);
+    }
+
+    @Override
+    public Long getItemCount() {
+        return (long) getCsvRows().size() - 1;
+    }
+
+    private List<String[]> getCsvRows() {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(resource.getInputStream()))) {
+            return reader.readAll();
+        } catch (IOException | CsvException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Item> createItems() {
         List<String[]> csvRows = getCsvRows();
-        List<Item> items = csvRows
+        return csvRows
                 .stream()
                 .skip(1)
                 .map(r -> {
@@ -60,20 +78,6 @@ public class InitialLoaderServiceImpl implements InitialLoaderService {
                     }
                 })
                 .toList();
-        itemRepositoryJdbc.saveAll(items);
-    }
-
-    @Override
-    public Long getItemCount() {
-        return (long) getCsvRows().size() - 1;
-    }
-
-    private List<String[]> getCsvRows() {
-        try (CSVReader reader = new CSVReader(new InputStreamReader(resource.getInputStream()))) {
-            return reader.readAll();
-        } catch (IOException | CsvException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }
