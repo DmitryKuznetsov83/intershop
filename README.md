@@ -24,3 +24,6 @@
 - Тест репозитория JPA
   [ItemRepositoryTest.java](src/test/java/ru/yandex/practicum/intershop/repository/ItemRepositoryTest.java)
 тесты запускаются с использованием testcontainers
+
+## Схема БД
+![db_schema.png](db_schema.png)
