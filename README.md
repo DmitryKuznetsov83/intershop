@@ -17,9 +17,10 @@
 - нажимаем кнопку "Загрузить тестовые данные"
 - после этого можно проверить, что данные загрузились в базу
 
-### Как запускать тесты
+## Как запускать тесты
 Есть следующие тесты
 - Интеграционный тест с полным контекстом
   [IntegrationTest.java](src/test/java/ru/yandex/practicum/intershop/integration/IntegrationTest.java)
 - Тест репозитория JPA
   [ItemRepositoryTest.java](src/test/java/ru/yandex/practicum/intershop/repository/ItemRepositoryTest.java)
+тесты запускаются с использованием testcontainers

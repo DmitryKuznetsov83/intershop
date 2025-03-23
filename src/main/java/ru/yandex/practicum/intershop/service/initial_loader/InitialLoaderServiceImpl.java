@@ -3,7 +3,6 @@ package ru.yandex.practicum.intershop.service.initial_loader;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
@@ -13,10 +12,10 @@ import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.repository.ItemRepositoryJdbc;
 import ru.yandex.practicum.intershop.repository.ItemRepositoryJpa;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 public class InitialLoaderServiceImpl implements InitialLoaderService {

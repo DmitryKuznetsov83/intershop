@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.intershop.SpringBootPostgreSQLBase;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.service.initial_loader.InitialLoaderServiceImpl;
@@ -21,7 +22,7 @@ import static org.hamcrest.Matchers.is;
 @Import({InitialLoaderServiceImpl.class, ItemRepositoryJdbc.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-public class ItemRepositoryTest {
+public class ItemRepositoryTest extends SpringBootPostgreSQLBase {
 
     @Autowired
     private ItemRepositoryJpa itemRepositoryJpa;
@@ -38,7 +39,7 @@ public class ItemRepositoryTest {
     @Transactional
     void cartQuantityTest() {
         List<Item> allItems = itemRepositoryJpa.findAll();
-        Item item = allItems.getFirst();
+        Item item = allItems.get(1);
 
         // позиции нет в корзине
         assertThat(item.getCartQuantity(), is(0));
