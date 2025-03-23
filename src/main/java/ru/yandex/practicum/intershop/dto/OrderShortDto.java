@@ -15,7 +15,6 @@ import java.util.List;
 public class OrderShortDto {
 
     private Long id;
-    private ZonedDateTime created;
     private List<ItemDto> items;
 
     public int getTotalSum() {

@@ -8,6 +8,3 @@ create table item
     image       bytea,
     has_image   boolean
 );
-
-alter table item
-    owner to postgres;
