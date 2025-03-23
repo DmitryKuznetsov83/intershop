@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Первоначальное заполнение каталога</title>
+</head>
+<body>
+
+<a href="/orders" style="float:right;">
+  <b>ЗАКАЗЫ &cudarrr;</b>
+</a>
+<a href="/cart/items" style="float:right;">
+  <b>КОРЗИНА &cudarrr;</b>
+</a>
+<a href="/main/items" style="float:right;">
+  <b>ГЛАВНАЯ &cudarrr;</b>
+</a>
+
+<h2>Первоначальное заполнение каталога</h2>
+<p>
+  <span th:text="${'Позиций в БД:' + dbCount}"></span>
+</p>
+
+<p>
+  <span th:text="${'Позиций в каталоге для первоначального заполнения: ' + ilCount}"></span>
+</p>
+
+<form th:action="${'/admin/initial-loader'}" method="post" style="display:inline">
+  <button name="action" value="Загрузить">Загрузить тестовые данные</button>
+</form>
+
+</body>
+</html>
