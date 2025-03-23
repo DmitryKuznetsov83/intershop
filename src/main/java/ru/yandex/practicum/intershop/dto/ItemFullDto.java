@@ -16,6 +16,7 @@ public class ItemFullDto {
     private String description;
     private Integer price;
     private Boolean hasImage;
+    private Integer countInCart;
 
     public String getImgPath() {
         if (hasImage) {
@@ -23,6 +24,10 @@ public class ItemFullDto {
         } else {
             return "images/no_image.jpeg";
         }
+    }
+
+    public Integer getCount() {
+        return countInCart;
     }
 
 }

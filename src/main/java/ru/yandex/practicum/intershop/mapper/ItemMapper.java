@@ -14,7 +14,8 @@ public class ItemMapper {
                 itemModel.getTitle(),
                 itemModel.getDescription(),
                 itemModel.getPrice(),
-                itemModel.isHasImage());
+                itemModel.isHasImage(),
+                itemModel.getCartQuantity());
     }
 
     public static List<ItemFullDto> mapToItemFullDtoList(List<Item> itemsModel) {

@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.context.annotation.Lazy;
 
 @Entity
 @Table(name="item")
 @Getter
+@Setter
 @NoArgsConstructor
 public class Item {
 
@@ -52,6 +54,17 @@ public class Item {
     @PreUpdate
     public void checkImagePresence() {
         this.hasImage = (image != null && image.length > 0);
+    }
+
+    @OneToOne(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CartItem cartItem;
+
+    public Integer getCartQuantity() {
+        if (cartItem == null) {
+            return 0;
+        } else {
+            return cartItem.getQuantity();
+        }
     }
 
 }

@@ -9,15 +9,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.intershop.configuration.IntershopConfiguration;
 import ru.yandex.practicum.intershop.dto.ItemFullDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
 import ru.yandex.practicum.intershop.dto.PagingDto;
+import ru.yandex.practicum.intershop.emun.CartAction;
 import ru.yandex.practicum.intershop.emun.Sorting;
+import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.item.ItemService;
 
 import java.util.List;
@@ -28,11 +27,13 @@ import java.util.List;
 public class MainController {
 
     private final ItemService itemService;
+    private final CartService cartService;
     private final IntershopConfiguration intershopConfiguration;
 
     @Autowired
-    public MainController(ItemService itemService, IntershopConfiguration intershopConfiguration) {
+    public MainController(ItemService itemService, CartService cartService, IntershopConfiguration intershopConfiguration) {
         this.itemService = itemService;
+        this.cartService = cartService;
         this.intershopConfiguration = intershopConfiguration;
     }
 
@@ -66,6 +67,13 @@ public class MainController {
         model.addAttribute("items", partitionedItems);
 
         return "main";
+    }
+
+    @PostMapping("/{itemId}")
+    public String changeCart(@PathVariable Long itemId,
+                             @RequestParam CartAction action) {
+        cartService.changeCart(itemId, action);
+        return "redirect:/main/items";
     }
 
 }

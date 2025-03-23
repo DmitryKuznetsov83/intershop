@@ -1,0 +1,8 @@
+package ru.yandex.practicum.intershop.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.yandex.practicum.intershop.model.CartItem;
+import ru.yandex.practicum.intershop.model.Item;
+
+public interface CartRepositoryJpa extends JpaRepository<CartItem, Item> {
+}
