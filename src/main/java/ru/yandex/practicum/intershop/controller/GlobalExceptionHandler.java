@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.intershop.exception.EmptyCartException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleIllegalStateException(IllegalStateException ex, Model model) {
         model.addAttribute("errors", List.of("Некорректный запрос: " + ex.getMessage()));
+        return "page-400.html";
+    }
+
+    @ExceptionHandler(EmptyCartException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleEmptyCartException(EmptyCartException ex, Model model) {
+        model.addAttribute("errors", List.of("Корзина пуста, нельзя оформить Заказ"));
         return "page-400.html";
     }
 

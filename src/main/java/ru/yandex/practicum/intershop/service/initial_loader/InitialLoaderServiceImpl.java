@@ -27,7 +27,7 @@ public class InitialLoaderServiceImpl implements InitialLoaderService {
     @Value("${intershop.initial-loader.catalog}")
     private Resource resource;
 
-    public InitialLoaderServiceImpl(ItemRepositoryJdbc itemRepositoryJdbc, ResourceLoader resourceLoader, ItemRepositoryJpa itemRepositoryJpa) {
+    public InitialLoaderServiceImpl(ItemRepositoryJdbc itemRepositoryJdbc, ResourceLoader resourceLoader) {
         this.itemRepositoryJdbc = itemRepositoryJdbc;
         this.resourceLoader = resourceLoader;
     }
@@ -57,26 +57,27 @@ public class InitialLoaderServiceImpl implements InitialLoaderService {
         return csvRows
                 .stream()
                 .skip(1)
-                .map(r -> {
-                    if (r.length == 4) {
-                        String filePath = "initial-loader/" + r[3].trim();
-                        Resource resource = resourceLoader.getResource("classpath:" + filePath);
-                        if (!resource.exists()) {
-                            // логируем ошибку
-                        }
-                        try (InputStream inputStream = resource.getInputStream()) {
-                            byte[] image = StreamUtils.copyToByteArray(inputStream);
-                            return new Item(null, r[0], r[1], Integer.parseInt(r[2]), image, true);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            throw new RuntimeException(e);
-                        }
-
-                    } else {
-                        return new Item(null, r[0], r[1], Integer.parseInt(r[2]), null, false);
-                    }
-                })
+                .map(this::stringRowToItem)
                 .toList();
     }
 
+    private Item stringRowToItem(String[] row) {
+        if (row.length == 4) {
+            String filePath = "initial-loader/" + row[3].trim();
+            Resource resource = resourceLoader.getResource("classpath:" + filePath);
+            if (!resource.exists()) {
+                // логируем ошибку
+            }
+            try (InputStream inputStream = resource.getInputStream()) {
+                byte[] image = StreamUtils.copyToByteArray(inputStream);
+                return new Item(null, row[0], row[1], Integer.parseInt(row[2]), image, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
+        } else {
+            return new Item(null, row[0], row[1], Integer.parseInt(row[2]), null, false);
+        }
+    }
 }

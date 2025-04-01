@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.emun.CartAction;
-import ru.yandex.practicum.intershop.mapper.ItemMapper;
+import ru.yandex.practicum.intershop.mapper.ItemMapperMS;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.repository.CartRepositoryJpa;
@@ -59,7 +59,7 @@ public class CartServiceImpl implements CartService {
         return cartRepositoryJpa.findAll()
                 .stream()
                 .map(CartItem::getItem)
-                .map(ItemMapper::mapToItemDto)
+                .map(ItemMapperMS.INSTANCE::mapToItemDto)
                 .sorted(Comparator.comparingLong(ItemDto::getId))
                 .toList();
     }

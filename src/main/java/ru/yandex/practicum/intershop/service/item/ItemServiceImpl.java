@@ -5,10 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.intershop.configuration.IntershopConfiguration;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
-import ru.yandex.practicum.intershop.mapper.ItemMapper;
+import ru.yandex.practicum.intershop.mapper.ItemMapperMS;
 import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.repository.ItemRepositoryJpa;
 import ru.yandex.practicum.intershop.utils.StringUtils;
@@ -23,7 +22,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepositoryJpa itemRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepositoryJpa itemRepository, IntershopConfiguration intershopConfiguration) {
+    public ItemServiceImpl(ItemRepositoryJpa itemRepository) {
         this.itemRepository = itemRepository;
     }
 
@@ -39,7 +38,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         List<ItemDto> itemDtos = page.stream()
-                .map(ItemMapper::mapToItemDto)
+                .map(ItemMapperMS.INSTANCE::mapToItemDto)
                 .toList();
 
         return new PageDto<>(itemDtos,
@@ -52,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemDto getItemById(Long id) {
-        return ItemMapper.mapToItemDto(itemRepository.findById(id)
+        return ItemMapperMS.INSTANCE.mapToItemDto(itemRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Товар с id " + id + " не найден")));
     }
 

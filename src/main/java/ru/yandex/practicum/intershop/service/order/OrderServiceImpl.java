@@ -5,7 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.intershop.dto.OrderFullDto;
 import ru.yandex.practicum.intershop.dto.OrderShortDto;
-import ru.yandex.practicum.intershop.mapper.OrderMapper;
+import ru.yandex.practicum.intershop.exception.EmptyCartException;
+import ru.yandex.practicum.intershop.mapper.OrderMapperMS;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.model.Order;
 import ru.yandex.practicum.intershop.model.OrderItem;
@@ -32,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderShortDto> getOrders() {
         return orderRepositoryJpa.findAll()
                 .stream()
-                .map(OrderMapper::mapToOrderShortDto)
+                .map(OrderMapperMS.INSTANCE::mapToOrderShortDto)
                 .toList();
     }
 
@@ -40,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public OrderFullDto getOrderById(Long id) {
         return orderRepositoryJpa.findById(id)
-                .map(OrderMapper::mapToOrderFullDto)
+                .map(OrderMapperMS.INSTANCE::mapToOrderFullDto)
                 .orElseThrow(() -> new NoSuchElementException("Заказ с id " + id + " не найден"));
     }
 
@@ -49,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
     public Long createOrder() {
         List<CartItem> allCartItems = cartRepositoryJpa.findAll();
         if (allCartItems.isEmpty()) {
-            throw new IllegalStateException("Корзина пуста");
+            throw new EmptyCartException();
         }
 
         Order newOrder = new Order();

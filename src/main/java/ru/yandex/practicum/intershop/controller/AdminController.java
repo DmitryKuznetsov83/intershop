@@ -18,7 +18,7 @@ public class AdminController {
     private final InitialLoaderService initialLoaderService;
 
     @Autowired
-    public AdminController(ItemService itemService, InitialLoaderServiceImpl initialLoaderServiceImpl, InitialLoaderService initialLoaderService) {
+    public AdminController(ItemService itemService, InitialLoaderService initialLoaderService) {
         this.itemService = itemService;
         this.initialLoaderService = initialLoaderService;
     }
