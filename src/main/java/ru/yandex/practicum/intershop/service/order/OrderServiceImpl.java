@@ -3,10 +3,9 @@ package ru.yandex.practicum.intershop.service.order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.intershop.dto.OrderFullDto;
-import ru.yandex.practicum.intershop.dto.OrderShortDto;
+import ru.yandex.practicum.intershop.dto.OrderDto;
 import ru.yandex.practicum.intershop.exception.EmptyCartException;
-import ru.yandex.practicum.intershop.mapper.OrderMapperMS;
+import ru.yandex.practicum.intershop.mapper.OrderMapper;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.model.Order;
 import ru.yandex.practicum.intershop.model.OrderItem;
@@ -30,18 +29,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderShortDto> getOrders() {
+    public List<OrderDto> getOrders() {
         return orderRepositoryJpa.findAll()
                 .stream()
-                .map(OrderMapperMS.INSTANCE::mapToOrderShortDto)
+                .map(OrderMapper.INSTANCE::mapToOrderDto)
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public OrderFullDto getOrderById(Long id) {
+    public OrderDto getOrderById(Long id) {
         return orderRepositoryJpa.findById(id)
-                .map(OrderMapperMS.INSTANCE::mapToOrderFullDto)
+                .map(OrderMapper.INSTANCE::mapToOrderDto)
                 .orElseThrow(() -> new NoSuchElementException("Заказ с id " + id + " не найден"));
     }
 

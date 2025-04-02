@@ -14,25 +14,6 @@ import org.springframework.context.annotation.Lazy;
 @NoArgsConstructor
 public class Item {
 
-    // Constructor for JPA
-    public Item(Long id, String title, String description, Integer price, byte[] image) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.image = image;
-    }
-
-    // Constructor for JDBC
-    public Item(Long id, String title, String description, Integer price, byte[] image, boolean hasImage) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.price = price;
-        this.image = image;
-        this.hasImage = hasImage;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -58,6 +39,26 @@ public class Item {
 
     @OneToOne(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private CartItem cartItem;
+
+
+    // Constructor for JPA
+    public Item(Long id, String title, String description, Integer price, byte[] image) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.price = price;
+        this.image = image;
+    }
+
+    // Constructor for JDBC
+    public Item(Long id, String title, String description, Integer price, byte[] image, boolean hasImage) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.price = price;
+        this.image = image;
+        this.hasImage = hasImage;
+    }
 
     public Integer getCartQuantity() {
         if (cartItem == null) {

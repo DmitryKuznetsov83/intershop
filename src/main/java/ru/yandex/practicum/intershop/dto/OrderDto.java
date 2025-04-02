@@ -11,13 +11,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderShortDto {
+public class OrderDto {
 
     private Long id;
     private List<ItemDto> items;
 
-    public int getTotalSum() {
+    public Integer getTotalSum() {
         return items.stream().mapToInt(ItemDto::getSum).sum();
     }
-
 }

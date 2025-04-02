@@ -8,9 +8,9 @@ import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.model.OrderItem;
 
 @Mapper
-public interface ItemMapperMS {
+public interface ItemMapper {
 
-    ItemMapperMS INSTANCE = Mappers.getMapper(ItemMapperMS.class);
+    ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
 
     @Mapping(target = "quantity", expression = "java(itemModel.getCartQuantity())")
     ItemDto mapToItemDto(Item itemModel);

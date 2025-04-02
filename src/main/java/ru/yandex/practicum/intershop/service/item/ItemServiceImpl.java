@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
-import ru.yandex.practicum.intershop.mapper.ItemMapperMS;
+import ru.yandex.practicum.intershop.mapper.ItemMapper;
 import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.repository.ItemRepositoryJpa;
 import ru.yandex.practicum.intershop.utils.StringUtils;
@@ -38,7 +38,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         List<ItemDto> itemDtos = page.stream()
-                .map(ItemMapperMS.INSTANCE::mapToItemDto)
+                .map(ItemMapper.INSTANCE::mapToItemDto)
                 .toList();
 
         return new PageDto<>(itemDtos,
@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemDto getItemById(Long id) {
-        return ItemMapperMS.INSTANCE.mapToItemDto(itemRepository.findById(id)
+        return ItemMapper.INSTANCE.mapToItemDto(itemRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Товар с id " + id + " не найден")));
     }
 
