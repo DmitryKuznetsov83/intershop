@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.service.order.OrderService;
 
 @Controller
@@ -18,9 +19,9 @@ public class BuyController {
     }
 
     @PostMapping()
-    public String changeCart() {
-        Long orderId = orderService.createOrder();
-        return "redirect:/orders/" + orderId + "?newOrder=true";
+    public Mono<String> changeCart() {
+        return orderService.createOrder()
+                .map(order -> "redirect:/orders/" + order + "?newOrder=true");
     }
 
 }

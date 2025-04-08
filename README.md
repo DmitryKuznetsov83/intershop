@@ -21,7 +21,7 @@
 Есть следующие тесты
 - Интеграционный тест с полным контекстом
   [IntegrationTest.java](src/test/java/ru/yandex/practicum/intershop/integration/IntegrationTest.java)
-- Тест репозитория JPA
+- Тест репозитория
   [ItemRepositoryTest.java](src/test/java/ru/yandex/practicum/intershop/repository/ItemRepositoryTest.java)
 тесты запускаются с использованием testcontainers
 

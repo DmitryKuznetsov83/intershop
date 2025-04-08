@@ -8,9 +8,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.model.Item;
-import ru.yandex.practicum.intershop.repository.ItemRepositoryJdbc;
-import ru.yandex.practicum.intershop.repository.ItemRepositoryJpa;
+import ru.yandex.practicum.intershop.repository.item.ItemRepository;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,28 +20,28 @@ import java.util.List;
 @Service
 public class InitialLoaderServiceImpl implements InitialLoaderService {
 
-    private final ItemRepositoryJdbc itemRepositoryJdbc;
+    private final ItemRepository itemRepository;
 
     private final ResourceLoader resourceLoader;
 
     @Value("${intershop.initial-loader.catalog}")
     private Resource resource;
 
-    public InitialLoaderServiceImpl(ItemRepositoryJdbc itemRepositoryJdbc, ResourceLoader resourceLoader) {
-        this.itemRepositoryJdbc = itemRepositoryJdbc;
+    public InitialLoaderServiceImpl(ItemRepository itemRepository, ResourceLoader resourceLoader) {
+        this.itemRepository = itemRepository;
         this.resourceLoader = resourceLoader;
     }
 
     @Override
     @Transactional
-    public void load() {
-        List<Item> items = createItems();
-        itemRepositoryJdbc.saveAll(items);
+    public Mono<Void> load() {
+        return itemRepository.saveAll(createItems())
+                .then();
     }
 
     @Override
-    public Long getItemCount() {
-        return (long) getCsvRows().size() - 1;
+    public Mono<Long> getItemCount() {
+        return Mono.just((long) getCsvRows().size() - 1);
     }
 
     private List<String[]> getCsvRows() {

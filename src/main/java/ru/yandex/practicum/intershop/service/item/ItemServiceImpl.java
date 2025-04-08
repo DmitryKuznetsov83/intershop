@@ -1,69 +1,70 @@
 package ru.yandex.practicum.intershop.service.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
-import ru.yandex.practicum.intershop.mapper.ItemMapperMS;
-import ru.yandex.practicum.intershop.model.Item;
-import ru.yandex.practicum.intershop.repository.ItemRepositoryJpa;
-import ru.yandex.practicum.intershop.utils.StringUtils;
+import ru.yandex.practicum.intershop.mapper.ItemMapper;
+import ru.yandex.practicum.intershop.model.CartItem;
+import ru.yandex.practicum.intershop.repository.cart.CartRepository;
+import ru.yandex.practicum.intershop.repository.item.ItemRepository;
 
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepositoryJpa itemRepository;
+    private final ItemRepository itemRepository;
+    private final CartRepository cartRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepositoryJpa itemRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, CartRepository cartRepository) {
         this.itemRepository = itemRepository;
+        this.cartRepository = cartRepository;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PageDto<ItemDto> getItems(String search, Pageable pageable) {
-        Page<Item> page;
-        if (StringUtils.isNullOrBlank(search)) {
-            page = itemRepository.findAll(pageable);
-        } else {
-            String searchPattern = "%" + search.trim() + "%";
-            page = itemRepository.findAllByTitleIsLikeIgnoreCaseOrDescriptionIsLikeIgnoreCase(searchPattern, searchPattern, pageable);
-        }
+    public Mono<PageDto<ItemDto>> getItems(Pageable pageable, String search) {
+        return itemRepository.findAll(pageable, search).map(ItemMapper.INSTANCE::mapToItemDto)
+                .collectList()
+                .zipWith(getItemCount())
+                .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()))
+                .map(p -> new PageDto<>(p.stream().toList(),
+                        p.getTotalPages(),
+                        p.getTotalElements(),
+                        p.hasNext(),
+                        p.hasPrevious()));
+    }
 
-        List<ItemDto> itemDtos = page.stream()
-                .map(ItemMapperMS.INSTANCE::mapToItemDto)
-                .toList();
+    @Override
+    public Mono<ItemDto> getItemById(Long id) {
+        return Mono.zip(itemRepository.findById(id)
+                                .switchIfEmpty(Mono.error(new NoSuchElementException("Товар с id " + id + " не найден"))),
+                        cartRepository.findById(id)
+                                .defaultIfEmpty(CartItem.getEmptyCartPosition()))
+                .map(tuple -> {
+                    ItemDto itemDto = ItemMapper.INSTANCE.mapToItemDto(tuple.getT1());
+                    itemDto.setQuantity(tuple.getT2().getQuantity());
+                    return itemDto;
+                });
 
-        return new PageDto<>(itemDtos,
-                page.getTotalPages(),
-                page.getTotalElements(),
-                page.hasNext(),
-                page.hasPrevious());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ItemDto getItemById(Long id) {
-        return ItemMapperMS.INSTANCE.mapToItemDto(itemRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Товар с id " + id + " не найден")));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Long getItemCount() {
+    public Mono<Long> getItemCount() {
         return itemRepository.count();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<byte[]> findImageByPostId(long itemId) {
-        return itemRepository.findImageByItemId(itemId);
+    public Mono<byte[]> findImageByPostId(long itemId) {
+        return itemRepository.findImageByItemId(itemId)
+                .switchIfEmpty(Mono.error(new NoSuchElementException("Картинка для товара с id " + itemId + " не найдена")));
     }
 }

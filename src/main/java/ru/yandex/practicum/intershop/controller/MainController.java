@@ -1,5 +1,6 @@
 package ru.yandex.practicum.intershop.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +11,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.configuration.IntershopConfiguration;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
 import ru.yandex.practicum.intershop.dto.PagingDto;
-import ru.yandex.practicum.intershop.emun.CartAction;
 import ru.yandex.practicum.intershop.emun.Sorting;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.item.ItemService;
@@ -38,11 +39,11 @@ public class MainController {
     }
 
     @GetMapping
-    public String getItems(Model model,
-                           @RequestParam(required = false) String search,
-                           @RequestParam(required = false) Sorting sorting,
-                           @RequestParam(required = false) @Positive Integer pageSize,
-                           @RequestParam(defaultValue = "1") @Positive Integer pageNumber) {
+    public Mono<String> getItems(Model model,
+                                 @RequestParam(required = false) String search,
+                                 @RequestParam(required = false) Sorting sorting,
+                                 @RequestParam(required = false) @Positive Integer pageSize,
+                                 @RequestParam(defaultValue = "1") @Positive Integer pageNumber) {
         if (sorting == null) {
             sorting = intershopConfiguration.getSortingByDefault();
         }
@@ -53,12 +54,15 @@ public class MainController {
         Sort sort = switch (sorting) {
             case ALPHA -> Sort.by("title");
             case PRICE -> Sort.by("price");
-            default -> Sort.unsorted();
+            default -> Sort.by("id");
         };
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sort);
-        PageDto<ItemDto> page = itemService.getItems(search, pageable);
-        List<List<ItemDto>> partitionedItems = ListUtils.partition(page.content(), intershopConfiguration.getCellInRow());
-        PagingDto pagingDto = new PagingDto(pageSize, pageNumber, page.hasPrevious(), page.hasNext());
+
+        Mono<PageDto<ItemDto>> pageDto = itemService.getItems(pageable, search);
+
+        Mono<List<List<ItemDto>>> partitionedItems = pageDto.map(p -> ListUtils.partition(p.content(), intershopConfiguration.getCellInRow()));
+        Integer finalPageSize = pageSize;
+        Mono<PagingDto> pagingDto = pageDto.map(p -> new PagingDto(finalPageSize, pageNumber, p.hasPrevious(), p.hasNext()));
 
         model.addAttribute("pageSizeOptions", intershopConfiguration.getPagingSizeOptions());
         model.addAttribute("search", search);
@@ -66,14 +70,14 @@ public class MainController {
         model.addAttribute("paging", pagingDto);
         model.addAttribute("items", partitionedItems);
 
-        return "main";
+        return Mono.just("main");
     }
 
     @PostMapping("/{itemId}")
-    public String changeCart(@PathVariable @Positive Long itemId,
-                             @RequestParam CartAction action) {
-        cartService.changeCart(itemId, action);
-        return "redirect:/main/items";
+    public Mono<String> changeCart(@PathVariable @Positive Long itemId,
+                                   @Valid @ModelAttribute ChangeCart changeCart) {
+        return cartService.changeCart(itemId, changeCart.getAction())
+                .then(Mono.just("redirect:/main/items"));
     }
 
 }

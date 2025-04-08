@@ -9,11 +9,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.intershop.dto.OrderFullDto;
-import ru.yandex.practicum.intershop.dto.OrderShortDto;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.intershop.dto.OrderDto;
 import ru.yandex.practicum.intershop.service.order.OrderService;
-
-import java.util.List;
 
 @Controller
 @RequestMapping(path = "/orders")
@@ -28,20 +27,20 @@ public class OrderController {
     }
 
     @GetMapping
-    public String getOrders(Model model) {
-        List<OrderShortDto> orders = orderService.getOrders();
+    public Mono<String> getOrders(Model model) {
+        Flux<OrderDto> orders = orderService.getOrders();
         model.addAttribute("orders", orders);
-        return "orders";
+        return Mono.just("orders");
     }
 
     @GetMapping("/{id}")
-    public String getOrder(Model model,
-                           @PathVariable @Positive Long id,
-                           @RequestParam(defaultValue = "false") boolean newOrder) {
-        OrderFullDto order = orderService.getOrderById(id);
+    public Mono<String> getOrder(Model model,
+                                 @PathVariable @Positive Long id,
+                                 @RequestParam(defaultValue = "false") boolean newOrder) {
+        Mono<OrderDto> order = orderService.getOrderById(id);
         model.addAttribute("newOrder", newOrder);
         model.addAttribute("order", order);
-        return "order";
+        return Mono.just("order");
     }
 
 }
