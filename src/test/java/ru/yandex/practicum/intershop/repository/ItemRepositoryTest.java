@@ -1,58 +1,57 @@
 package ru.yandex.practicum.intershop.repository;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.r2dbc.core.DatabaseClient;
 import ru.yandex.practicum.intershop.SpringBootPostgreSQLBase;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.model.Item;
+import ru.yandex.practicum.intershop.repository.cart.CartRepository;
+import ru.yandex.practicum.intershop.repository.item.ItemRepository;
 import ru.yandex.practicum.intershop.service.initial_loader.InitialLoaderServiceImpl;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
-@DataJpaTest
-@Import({InitialLoaderServiceImpl.class, ItemRepositoryJdbc.class})
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
+@DataR2dbcTest
+@Import({InitialLoaderServiceImpl.class})
 public class ItemRepositoryTest extends SpringBootPostgreSQLBase {
 
     @Autowired
-    private ItemRepositoryJpa itemRepositoryJpa;
+    private DatabaseClient databaseClient;
+
+    @Autowired
+    private ItemRepository itemRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
 
     @Autowired
     private InitialLoaderServiceImpl initialLoaderService;
 
     @BeforeEach
     public void setUp() {
-        initialLoaderService.load();
+        databaseClient.sql("TRUNCATE TABLE order_item, orders, cart_item, item CASCADE;").then().block();
+        initialLoaderService.load().block();
     }
 
     @Test
-    @Transactional
     void cartQuantityTest() {
-        List<Item> allItems = itemRepositoryJpa.findAll();
-        Item item = allItems.get(1);
+        List<Item> allItems = itemRepository.findAll().collectList().block();
+        Long itemId = allItems.get(0).getId();
 
-        // позиции нет в корзине
-        assertThat(item.getCartQuantity(), is(0));
+        cartRepository.insert(itemId, 3).block();
 
-        CartItem cartItem = new CartItem();
-        cartItem.setQuantity(3);
-        cartItem.setItem(item);
-        item.setCartItem(cartItem);
-        itemRepositoryJpa.save(item);
-
-        // в корзине 3 штуки
-        assertThat(item.getCartQuantity(), is(3));
+        Assertions.assertThat(cartRepository.findById(itemId).block())
+                .withFailMessage("Должна сохраняться позиция в корзине")
+                .isNotNull()
+                .withFailMessage("Количество должно быть 3")
+                .extracting(CartItem::getQuantity)
+                .isEqualTo(3);
 
     }
-
 }

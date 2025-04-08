@@ -19,8 +19,11 @@ services:
       - "8080:8080"
       - "8081:8081"
     environment:
-      - SPRING.DATASOURCE.URL=jdbc:postgresql://intershop-db:5432/intershop_db
-      - SPRING.DATASOURCE.USERNAME=intershop_user
-      - SPRING.DATASOURCE.PASSWORD=intershop_password
+      - SPRING.R2DBC.URL=r2dbc:postgresql://intershop-db:5432/intershop_db
+      - SPRING.R2DBC.USERNAME=intershop_user
+      - SPRING.R2DBC.PASSWORD=intershop_password
+      - SPRING.LIQUIBASE.URL=jdbc:postgresql://intershop-db:5432/intershop_db
+      - SPRING.LIQUIBASE.USER=intershop_user
+      - SPRING.LIQUIBASE.PASSWORD=intershop_password
     depends_on:
       - intershop-db

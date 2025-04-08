@@ -4,23 +4,22 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import ru.yandex.practicum.intershop.dto.ItemDto;
+import ru.yandex.practicum.intershop.repository.item.ItemWithQuantityProjection;
+import ru.yandex.practicum.intershop.repository.order.OrderItemProjection;
 import ru.yandex.practicum.intershop.model.Item;
-import ru.yandex.practicum.intershop.model.OrderItem;
 
 @Mapper
 public interface ItemMapper {
 
     ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
 
-    @Mapping(target = "quantity", expression = "java(itemModel.getCartQuantity())")
+    @Mapping(target = "quantity", constant = "0")
     ItemDto mapToItemDto(Item itemModel);
 
-    @Mapping(target="id", source = "orderItem.item.id")
-    @Mapping(target="title", source = "orderItem.item.title")
-    @Mapping(target="description", source = "orderItem.item.description")
-    @Mapping(target="price", source = "orderItem.item.price")
-    @Mapping(target="hasImage", source = "orderItem.item.hasImage")
-    @Mapping(target="quantity", source = "orderItem.quantity")
-    ItemDto mapToItemDto(OrderItem orderItem);
+    @Mapping(target = "hasImage", source = "has_image")
+    ItemDto mapToItemDto(ItemWithQuantityProjection itemWithQuantityProjection);
+
+    @Mapping(target = "id", source = "orderItemProjection.item_id")
+    ItemDto mapToItemDto(OrderItemProjection orderItemProjection);
 
 }
