@@ -1,9 +1,11 @@
 package ru.yandex.practicum.intershop.service.initial_loader;
 
+import reactor.core.publisher.Mono;
+
 public interface InitialLoaderService {
 
-    void load();
+    Mono<Void> load();
 
-    Long getItemCount();
+    Mono<Long> getItemCount();
 
 }

@@ -1,21 +1,19 @@
 package ru.yandex.practicum.intershop.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.configuration.IntershopConfiguration;
 import ru.yandex.practicum.intershop.dto.ItemDto;
-import ru.yandex.practicum.intershop.emun.CartAction;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.item.ItemService;
-
-import java.util.Optional;
 
 @Controller
 @RequestMapping(path = "/items/{itemId}")
@@ -32,31 +30,26 @@ public class ItemController {
     }
 
     @GetMapping()
-    public String getItem(Model model, @PathVariable @Positive Long itemId) {
-        ItemDto item = itemService.getItemById(itemId);
+    public Mono<String> getItem(Model model, @PathVariable @Positive Long itemId) {
+        Mono<ItemDto> item = itemService.getItemById(itemId);
         model.addAttribute("item", item);
-        return "item";
+        return Mono.just("item");
     }
 
     @PostMapping()
-    public String changeCart(@PathVariable @Positive Long itemId,
-                             @RequestParam CartAction action) {
-        cartService.changeCart(itemId, action);
-        return "redirect:/items/" + itemId;
+    public Mono<String> changeCart(@PathVariable @Positive Long itemId,
+                                   @Valid @ModelAttribute ChangeCart changeCart) {
+        return cartService.changeCart(itemId, changeCart.getAction())
+                .then(Mono.just("redirect:/items/" + itemId));
     }
 
     // IMAGES
     @GetMapping("/image")
-    public ResponseEntity<ByteArrayResource> getImage(@PathVariable @Positive Long itemId) {
-        Optional<byte[]> image = itemService.findImageByPostId(itemId);
-        if (image.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        ByteArrayResource resource = new ByteArrayResource(image.get());
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(resource);
+    public Mono<ResponseEntity<ByteArrayResource>> getImage(@PathVariable @Positive Long itemId) {
+        return itemService.findImageByPostId(itemId)
+                .map(image -> ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(new ByteArrayResource(image)));
     }
 
 }

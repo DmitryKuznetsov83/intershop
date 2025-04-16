@@ -6,8 +6,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.service.initial_loader.InitialLoaderService;
-import ru.yandex.practicum.intershop.service.initial_loader.InitialLoaderServiceImpl;
 import ru.yandex.practicum.intershop.service.item.ItemService;
 
 @Controller
@@ -24,16 +24,16 @@ public class AdminController {
     }
 
     @GetMapping("/initial-loader")
-    public String initialLoading(Model model) {
+    public Mono<String> initialLoading(Model model) {
         model.addAttribute("dbCount", itemService.getItemCount());
         model.addAttribute("ilCount", initialLoaderService.getItemCount());
-        return "initial-loader";
+        return Mono.just("initial-loader");
     }
 
     @PostMapping("/initial-loader")
-    public String initialLoadingStart() {
-        initialLoaderService.load();
-        return "redirect:/admin/initial-loader";
+    public Mono<String> initialLoadingStart() {
+       return initialLoaderService.load()
+                .then(Mono.just("redirect:/admin/initial-loader"));
     }
 
 }
