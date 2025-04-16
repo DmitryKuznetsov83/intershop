@@ -58,7 +58,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Flux<ItemDto> getCartItems() {
         return cartRepository.getCart()
                 .map(ItemMapper.INSTANCE::mapToItemDto)

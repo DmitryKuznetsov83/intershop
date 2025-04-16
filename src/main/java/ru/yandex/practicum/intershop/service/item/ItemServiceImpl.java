@@ -12,6 +12,7 @@ import ru.yandex.practicum.intershop.mapper.ItemMapper;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.repository.cart.CartRepository;
 import ru.yandex.practicum.intershop.repository.item.ItemRepository;
+import ru.yandex.practicum.intershop.utils.StringUtils;
 
 import java.util.NoSuchElementException;
 
@@ -28,11 +29,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Mono<PageDto<ItemDto>> getItems(Pageable pageable, String search) {
         return itemRepository.findAll(pageable, search).map(ItemMapper.INSTANCE::mapToItemDto)
                 .collectList()
-                .zipWith(getItemCount())
+                .zipWith(StringUtils.isNullOrBlank(search) ? getItemCount() : getItemCount(search))
                 .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()))
                 .map(p -> new PageDto<>(p.stream().toList(),
                         p.getTotalPages(),
@@ -56,13 +56,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Mono<Long> getItemCount() {
         return itemRepository.count();
     }
 
     @Override
-    @Transactional(readOnly = true)
+    public Mono<Long> getItemCount(String search) {
+        return itemRepository.countWithSearch("%" + search + "%");
+    }
+
+    @Override
     public Mono<byte[]> findImageByPostId(long itemId) {
         return itemRepository.findImageByItemId(itemId)
                 .switchIfEmpty(Mono.error(new NoSuchElementException("Картинка для товара с id " + itemId + " не найдена")));

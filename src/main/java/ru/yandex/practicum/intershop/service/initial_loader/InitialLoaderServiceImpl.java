@@ -33,7 +33,6 @@ public class InitialLoaderServiceImpl implements InitialLoaderService {
     }
 
     @Override
-    @Transactional
     public Mono<Void> load() {
         return itemRepository.saveAll(createItems())
                 .then();
