@@ -21,7 +21,7 @@
             </h2>
             <table>
                 <tr th:each="item : ${order.getItems()}">
-                    <td th:text="${item.getTitle()+' ('+item.getQuantity()+' шт.) '+item.getSum()+' руб.'}"></td>
+                    <td th:text="${item.getTitle()+' ('+item.getQuantity()+' шт.) '+item.calculateSum()+' руб.'}"></td>
                 </tr>
             </table>
             <p>

@@ -15,6 +15,6 @@ public class OrderDto {
     private List<ItemDto> items;
 
     public Integer getTotalSum() {
-        return items.stream().mapToInt(ItemDto::getSum).sum();
+        return items.stream().mapToInt(ItemDto::calculateSum).sum();
     }
 }

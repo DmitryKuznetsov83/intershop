@@ -16,7 +16,7 @@ public class ItemDto {
     private Boolean hasImage;
     private Integer quantity;
 
-    public String getImgPath() {
+    public String returnImgPath() {
         if (hasImage) {
             return "items/" + id + "/image";
         } else {
@@ -24,7 +24,7 @@ public class ItemDto {
         }
     }
 
-    public Integer getSum() {
+    public Integer calculateSum() {
         return price * quantity;
     }
 

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.PageDto;
@@ -21,11 +20,13 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final CartRepository cartRepository;
+    private final ItemCacheService itemCacheService;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, CartRepository cartRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, CartRepository cartRepository, ItemCacheService itemCacheService) {
         this.itemRepository = itemRepository;
         this.cartRepository = cartRepository;
+        this.itemCacheService = itemCacheService;
     }
 
     @Override
@@ -43,8 +44,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Mono<ItemDto> getItemById(Long id) {
-        return Mono.zip(itemRepository.findById(id)
-                                .switchIfEmpty(Mono.error(new NoSuchElementException("Товар с id " + id + " не найден"))),
+        return Mono.zip(itemCacheService.getItemById(id),
                         cartRepository.findById(id)
                                 .defaultIfEmpty(CartItem.getEmptyCartPosition()))
                 .map(tuple -> {
@@ -52,7 +52,6 @@ public class ItemServiceImpl implements ItemService {
                     itemDto.setQuantity(tuple.getT2().getQuantity());
                     return itemDto;
                 });
-
     }
 
     @Override
@@ -67,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Mono<byte[]> findImageByPostId(long itemId) {
-        return itemRepository.findImageByItemId(itemId)
-                .switchIfEmpty(Mono.error(new NoSuchElementException("Картинка для товара с id " + itemId + " не найдена")));
+        return itemCacheService.findImageByPostId(itemId);
     }
+
 }

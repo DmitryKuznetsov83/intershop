@@ -13,7 +13,10 @@ public interface ItemService {
 
     Mono<Long> getItemCount();
 
+//    Mono<Long> getItemCount(String search);
+
     Mono<Long> getItemCount(String search);
 
     Mono<byte[]> findImageByPostId(long itemId);
+
 }

@@ -91,6 +91,11 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+
         <!-- TEST-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -121,8 +126,6 @@
             <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
-
-<!--        testImplementation "org.springframework.boot:spring-boot-testcontainers"-->
 
     </dependencies>
 
