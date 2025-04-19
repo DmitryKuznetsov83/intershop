@@ -25,7 +25,7 @@ public class AdminController {
 
     @GetMapping("/initial-loader")
     public Mono<String> initialLoading(Model model) {
-        model.addAttribute("dbCount", itemService.getItemCount());
+        model.addAttribute("dbCount", itemService.getItemCount(true));
         model.addAttribute("ilCount", initialLoaderService.getItemCount());
         return Mono.just("initial-loader");
     }

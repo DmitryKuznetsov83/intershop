@@ -10,30 +10,50 @@ import ru.yandex.practicum.intershop.dto.PageDto;
 import ru.yandex.practicum.intershop.mapper.ItemMapper;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.repository.cart.CartRepository;
-import ru.yandex.practicum.intershop.repository.item.ItemRepository;
 import ru.yandex.practicum.intershop.utils.StringUtils;
-
-import java.util.NoSuchElementException;
 
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepository itemRepository;
-    private final CartRepository cartRepository;
     private final ItemCacheService itemCacheService;
+    private final CartRepository cartRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, CartRepository cartRepository, ItemCacheService itemCacheService) {
-        this.itemRepository = itemRepository;
-        this.cartRepository = cartRepository;
+    public ItemServiceImpl(ItemCacheService itemCacheService, CartRepository cartRepository) {
         this.itemCacheService = itemCacheService;
+        this.cartRepository = cartRepository;
     }
 
     @Override
-    public Mono<PageDto<ItemDto>> getItems(Pageable pageable, String search) {
-        return itemRepository.findAll(pageable, search).map(ItemMapper.INSTANCE::mapToItemDto)
+    public Mono<PageDto<ItemDto>> getItems(Pageable pageable, String searchRaw) {
+        String search;
+        if (StringUtils.isNullOrBlank(searchRaw)) {
+            search = null;
+        } else {
+            search = searchRaw.trim().toLowerCase();
+        }
+        return itemCacheService.findAll(pageable, search)
+                .map(ItemMapper.INSTANCE::mapToItemDto)
                 .collectList()
-                .zipWith(StringUtils.isNullOrBlank(search) ? getItemCount() : getItemCount(search))
+                .flatMap(itemDtoList -> {
+                    return cartRepository
+                            .findAllById(itemDtoList
+                                    .stream()
+                                    .map(ItemDto::getId)
+                                    .toList())
+                            .collectList()
+                            .flatMap(cartItems -> {
+                                for (ItemDto itemDto : itemDtoList) {
+                                    for (CartItem cartItem : cartItems) {
+                                        if (itemDto.getId().equals(cartItem.getItemId())) {
+                                            itemDto.setQuantity(cartItem.getQuantity());
+                                        }
+                                    }
+                                }
+                                return Mono.just(itemDtoList);
+                            });
+                })
+                .zipWith(search == null? getItemCount(false) : getItemCount(search))
                 .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()))
                 .map(p -> new PageDto<>(p.stream().toList(),
                         p.getTotalPages(),
@@ -55,13 +75,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Mono<Long> getItemCount() {
-        return itemRepository.count();
+    public Mono<Long> getItemCount(boolean forceCacheRefresh) {
+        return itemCacheService.count(forceCacheRefresh);
     }
 
     @Override
     public Mono<Long> getItemCount(String search) {
-        return itemRepository.countWithSearch("%" + search + "%");
+        return itemCacheService.countWithSearch(search.trim().toLowerCase());
     }
 
     @Override

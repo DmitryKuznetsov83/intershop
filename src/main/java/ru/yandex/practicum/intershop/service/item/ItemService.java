@@ -11,9 +11,7 @@ public interface ItemService {
 
     Mono<ItemDto> getItemById(Long id);
 
-    Mono<Long> getItemCount();
-
-//    Mono<Long> getItemCount(String search);
+    Mono<Long> getItemCount(boolean forceCacheRefresh);
 
     Mono<Long> getItemCount(String search);
 

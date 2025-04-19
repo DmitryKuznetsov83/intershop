@@ -11,6 +11,12 @@ services:
       - POSTGRES_USER=intershop_user
       - POSTGRES_PASSWORD=intershop_password
 
+  intershop-redis-cache:
+    image: redis:7.4.2-bookworm
+    container_name: intershop_cache_container
+    ports:
+      - "6379:6379"
+
   intershop-server:
     build: .
     image: intershop-server-image
@@ -25,5 +31,8 @@ services:
       - SPRING.LIQUIBASE.URL=jdbc:postgresql://intershop-db:5432/intershop_db
       - SPRING.LIQUIBASE.USER=intershop_user
       - SPRING.LIQUIBASE.PASSWORD=intershop_password
+      - SPRING.DATA.REDIS.HOST=intershop-redis-cache
+      - SPRING.DATA.REDIS.PORT=6379
     depends_on:
       - intershop-db
+      - intershop-redis-cache

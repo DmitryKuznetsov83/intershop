@@ -5,6 +5,7 @@ import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.utils.StringUtils;
 
 import java.nio.ByteBuffer;
@@ -21,15 +22,13 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
     }
 
     @Override
-    public Flux<ItemWithQuantityProjection> findAll(Pageable pageable, String search) {
+    public Flux<Item> findAll(Pageable pageable, String search) {
         String baseQuery = """
-            SELECT i.id, i.title, i.description, i.price, i.has_image,
-                   COALESCE(c.quantity, 0) AS quantity
+            SELECT i.id, i.title, i.description, i.price, i.has_image
             FROM item i
-            LEFT JOIN cart_item c ON c.item_id = i.id
         """;
 
-        boolean hasSearch = !StringUtils.isNullOrBlank(search);
+        boolean hasSearch = search != null;
         String whereClause = "WHERE lower(i.title) LIKE lower(:searchPattern) OR lower(i.description) LIKE lower(:searchPattern)";
 
         String orderBy = pageable.getSort().isSorted()
@@ -53,14 +52,13 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 
         return spec
                 .map((row, meta) -> {
-                    ItemWithQuantityProjection dto = new ItemWithQuantityProjection();
-                    dto.setId(row.get("id", Long.class));
-                    dto.setTitle(row.get("title", String.class));
-                    dto.setDescription(row.get("description", String.class));
-                    dto.setPrice(row.get("price", Integer.class));
-                    dto.setHas_image(row.get("has_image", Boolean.class));
-                    dto.setQuantity(row.get("quantity", Integer.class));
-                    return dto;
+                    Item item = new Item();
+                    item.setId(row.get("id", Long.class));
+                    item.setTitle(row.get("title", String.class));
+                    item.setDescription(row.get("description", String.class));
+                    item.setPrice(row.get("price", Integer.class));
+                    item.setHasImage(row.get("has_image", Boolean.class));
+                    return item;
                 })
                 .all();
     }
