@@ -11,10 +11,17 @@
     </parent>
 
     <groupId>ru.yandex.practicum</groupId>
-    <artifactId>intershop</artifactId>
+    <artifactId>inter-project</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>intershop</name>
-    <description>intershop</description>
+    <packaging>pom</packaging>
+    <name>inter-project</name>
+    <description>inter-project</description>
+
+    <modules>
+        <module>inter-payment</module>
+        <module>inter-shop</module>
+        <module>inter-payment/inter-payment-client</module>
+    </modules>
 
     <properties>
         <java.version>21</java.version>

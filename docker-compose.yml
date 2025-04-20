@@ -18,7 +18,7 @@ services:
       - "6379:6379"
 
   intershop-server:
-    build: .
+    build: ./inter-shop
     image: intershop-server-image
     container_name: intershop_server_container
     ports:
