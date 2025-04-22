@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Import;
 import ru.yandex.practicum.client.InterPaymentClientConfig;
 
 @SpringBootApplication
-@Import(InterPaymentClientConfig.class)
 public class IntershopApplication {
 
     public static void main(String[] args) {
