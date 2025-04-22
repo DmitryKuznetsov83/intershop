@@ -19,9 +19,10 @@ public class BuyController {
     }
 
     @PostMapping()
-    public Mono<String> changeCart() {
+    public Mono<String> createOrder() {
         return orderService.createOrder()
-                .map(order -> "redirect:/orders/" + order + "?newOrder=true");
+                .map(order -> "redirect:/orders/" + order + "?newOrder=true")
+                .onErrorResume(Mono::error);
     }
 
 }

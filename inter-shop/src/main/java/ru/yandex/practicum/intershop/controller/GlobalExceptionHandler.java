@@ -50,11 +50,11 @@ public class GlobalExceptionHandler {
         return Mono.just("page-404.html");
     }
 
-//    @ExceptionHandler(Throwable.class)
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public Mono<String> handleThrowable(final Throwable ex, Model model) {
-//        model.addAttribute("error","Внутренняя ошибка сервера: " + ex.getMessage());
-//        return Mono.just("page-500.html");
-//    }
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Mono<String> handleThrowable(final Throwable ex, Model model) {
+        model.addAttribute("error","Внутренняя ошибка сервера: " + ex.getMessage());
+        return Mono.just("page-500.html");
+    }
 
 }

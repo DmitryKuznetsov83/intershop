@@ -11,16 +11,12 @@
 
     <artifactId>inter-payment</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>inter-payment-server</module>
         <module>inter-payment-client</module>
-        <module>inter-payment-dto</module>
+        <module>inter-payment-core</module>
     </modules>
 
-    <properties>
-        <maven.compiler.source>23</maven.compiler.source>
-        <maven.compiler.target>23</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
 </project>

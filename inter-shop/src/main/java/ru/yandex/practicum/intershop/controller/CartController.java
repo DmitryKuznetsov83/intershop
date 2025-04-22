@@ -11,6 +11,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.service.cart.CartService;
+import ru.yandex.practicum.intershop.service.cart.CartState;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/cart/items")
@@ -26,15 +29,17 @@ public class CartController {
 
     @GetMapping
     public Mono<String> getCart(Model model) {
-        Flux<ItemDto> cartItems = cartService.getCartItems();
-        model.addAttribute("items", cartItems);
+        Mono<CartState> cartState = cartService.getCartState();
 
-        model.addAttribute("empty", cartItems.hasElements().map(hasElements -> !hasElements));
-        model.addAttribute("total", cartItems
-                .map(item -> item.getPrice() * item.getQuantity())
-                .reduce(0, Integer::sum));
+        model.addAttribute("items",                     cartState.map(CartState::getItems));
+        model.addAttribute("empty",                     cartState.map(CartState::isEmpty));
+        model.addAttribute("total",                     cartState.map(CartState::getCartSum));
+        model.addAttribute("paymentServiceAvailable",   cartState.map(CartState::isPaymentServiceAvailable));
+        model.addAttribute("balance",                   cartState.map(CartState::getBalance));
+        model.addAttribute("purchaseIsPossible",        cartState.map(CartState::isPurchaseIsPossible));
 
         return Mono.just("cart");
+
     }
 
     @PostMapping("/{itemId}")

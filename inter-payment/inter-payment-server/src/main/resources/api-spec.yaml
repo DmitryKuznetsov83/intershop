@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  description: Payment Service API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: payment-service
+
+paths:
+  /balance:
+    get:
+      summary: Получить баланс счета
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sum:
+                    type: integer
+                    example: 1000
+                  timestamp:
+                    type: string
+                    example: 2024-12-12-15-15-15
+    post:
+      summary: Изменить баланс счета
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionUUID:
+                  type: string
+                  example: 1234567890
+                operation:
+                  type: string
+                  example: topping
+                sum:
+                  type: integer
+                  example: 100
+              required:
+                - transactionUUID
+                - operation
+                - sum
+      responses:
+        '201':
+          description: Успешное изменение баланса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sum:
+                    type: integer
+                    example: 1000
+        '409':
+          description: Изменение баланса не удалось
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sum:
+                    type: integer
+                    example: 1000

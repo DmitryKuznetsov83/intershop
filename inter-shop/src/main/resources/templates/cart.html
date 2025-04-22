@@ -46,13 +46,14 @@
     </tr>
     <tr>
         <td style="text-align:right">
-            <b th:text="'Итого: '+${total}+' руб.'"></b>
+            <b th:if="${paymentServiceAvailable}"  th:text="'Итого: '+${total}+' руб. (Баланс: '+${balance}+' руб.)'"></b>
+            <b th:if="${!paymentServiceAvailable}"  th:text="'Итого: '+${total}+' руб. (Баланс: НЕИЗВЕСТНО. Платежный сервис недоступен)'"></b>
         </td>
     </tr>
     <tr>
         <td style="text-align:right">
             <form action="/buy" method="post" th:if="${!empty}">
-                <button>Купить</button>
+                <button th:disabled="${!purchaseIsPossible}">Купить</button>
             </form>
         </td>
     </tr>

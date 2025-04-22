@@ -9,4 +9,11 @@ public interface CartService {
     Mono<Void> changeCart(Long itemId, CartAction operation);
 
     Flux<ItemDto> getCartItems();
+
+    Mono<Integer> getBalance();
+
+    Mono<Void> clearCart();
+
+    Mono<CartState> getCartState();
+
 }
