@@ -1,9 +1,10 @@
-package ru.yandex.practicum.dto;
+package ru.yandex.practicum.dto.dto;
 
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 public class ApiErrorDto {
@@ -17,6 +18,6 @@ public class ApiErrorDto {
         this.exception = exception.getClass().getSimpleName();
         this.message = exception.getMessage();
         this.status = status.toString();
-        this.timestamp = LocalDateTime.now().format(DateTimeFormatterFactory.getDefaultDateTimeFormatter());
+        this.timestamp = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now());
     }
 }

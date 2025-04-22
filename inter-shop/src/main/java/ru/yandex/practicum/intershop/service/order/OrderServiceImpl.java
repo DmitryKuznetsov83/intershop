@@ -2,12 +2,11 @@ package ru.yandex.practicum.intershop.service.order;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.client.InterPaymentClient;
-import ru.yandex.practicum.dto.LackOfFundsException;
+import ru.yandex.practicum.dto.exception.LackOfFundsException;
 import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.dto.OrderDto;
 import ru.yandex.practicum.intershop.exception.EmptyCartException;
@@ -21,7 +20,6 @@ import ru.yandex.practicum.intershop.repository.order.OrderRepository;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.cart.CartState;
 
-import java.rmi.ServerError;
 import java.util.List;
 import java.util.NoSuchElementException;
 

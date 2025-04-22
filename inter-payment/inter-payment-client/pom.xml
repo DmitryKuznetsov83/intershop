@@ -17,7 +17,7 @@
 
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
-            <artifactId>inter-payment-dto</artifactId>
+            <artifactId>inter-payment-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

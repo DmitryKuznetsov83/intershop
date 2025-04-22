@@ -4,11 +4,11 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.dto.BalanceDto;
-import ru.yandex.practicum.dto.TransactionDto;
+import ru.yandex.practicum.dto.dto.BalanceDto;
+import ru.yandex.practicum.dto.dto.TransactionDto;
 import ru.yandex.practicum.dto.TransactionOperation;
-import ru.yandex.practicum.dto.LackOfFundsException;
-import ru.yandex.practicum.dto.RepeatTransactionException;
+import ru.yandex.practicum.dto.exception.LackOfFundsException;
+import ru.yandex.practicum.dto.exception.RepeatTransactionException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

@@ -4,6 +4,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.dto.*;
+import ru.yandex.practicum.dto.dto.ApiErrorDto;
+import ru.yandex.practicum.dto.dto.BalanceDto;
+import ru.yandex.practicum.dto.dto.TransactionDto;
+import ru.yandex.practicum.dto.exception.LackOfFundsException;
+import ru.yandex.practicum.dto.exception.RepeatTransactionException;
 
 import java.util.UUID;
 

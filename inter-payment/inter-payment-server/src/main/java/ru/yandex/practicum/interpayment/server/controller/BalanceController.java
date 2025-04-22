@@ -5,11 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.dto.ApiErrorDto;
-import ru.yandex.practicum.dto.BalanceDto;
-import ru.yandex.practicum.dto.TransactionDto;
-import ru.yandex.practicum.dto.LackOfFundsException;
-import ru.yandex.practicum.dto.RepeatTransactionException;
+import ru.yandex.practicum.dto.dto.ApiErrorDto;
+import ru.yandex.practicum.dto.dto.BalanceDto;
+import ru.yandex.practicum.dto.dto.TransactionDto;
+import ru.yandex.practicum.dto.exception.LackOfFundsException;
+import ru.yandex.practicum.dto.exception.RepeatTransactionException;
 import ru.yandex.practicum.interpayment.server.service.BalanceService;
 
 @RestController

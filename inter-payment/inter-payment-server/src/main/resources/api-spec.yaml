@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8081
     description: payment-service
 
 paths:
@@ -18,14 +18,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  sum:
-                    type: integer
-                    example: 1000
-                  timestamp:
-                    type: string
-                    example: 2024-12-12-15-15-15
+                $ref: '#/components/schemas/Balance'
     post:
       summary: Изменить баланс счета
       requestBody:
@@ -33,39 +26,73 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                transactionUUID:
-                  type: string
-                  example: 1234567890
-                operation:
-                  type: string
-                  example: topping
-                sum:
-                  type: integer
-                  example: 100
-              required:
-                - transactionUUID
-                - operation
-                - sum
+              $ref: '#/components/schemas/Transaction'
       responses:
-        '201':
+        '200':
           description: Успешное изменение баланса
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  sum:
-                    type: integer
-                    example: 1000
-        '409':
-          description: Изменение баланса не удалось
+                $ref: '#/components/schemas/Balance'
+        '402':
+          description: Изменение баланса не удалось. Недостаточно средств.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  sum:
-                    type: integer
-                    example: 1000
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Изменение баланса не удалось. Повтор UUID транзакции.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  schemas:
+
+    Balance:
+      type: object
+      properties:
+        balance:
+          type: integer
+          example: 1000
+        date:
+          type: string
+          example: 2025-04-22T20:42:49.5195686
+      required:
+        - balance
+        - date
+
+    Transaction:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: e537a402-5e57-4cf2-a74c-d08391f21061
+        operation:
+          type: string
+          example: TOPPING
+          enum: [TOPPING, PAYMENT]
+        amount:
+          type: integer
+          example: 1000
+      required:
+        - uuid
+        - operation
+        - amount
+
+    ApiError:
+      type: object
+      properties:
+        exception:
+          type: string
+          example: LackOfFundsException
+        message:
+          type: string
+          example: Translation with id 6ba7b810-9dad-11d1-80b4-00c04fd430c9 has already been processed
+        status:
+          type: string
+          example: 402 PAYMENT REQUIRED
+        timestamp:
+          type: string
+          example: 2025-04-22T20:42:49.5195686
