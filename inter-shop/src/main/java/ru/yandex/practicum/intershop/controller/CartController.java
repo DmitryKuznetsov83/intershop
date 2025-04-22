@@ -7,13 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.cart.CartState;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/cart/items")
