@@ -3,7 +3,7 @@ services:
 
   intershop-db:
     image: postgres:17-alpine
-    container_name: intershop_db_container
+    container_name: inter_shop_db_container
     ports:
       - "6541:5432"
     environment:
@@ -11,13 +11,27 @@ services:
       - POSTGRES_USER=intershop_user
       - POSTGRES_PASSWORD=intershop_password
 
-  intershop-server:
-    build: .
-    image: intershop-server-image
-    container_name: intershop_server_container
+  intershop-redis-cache:
+    image: redis:7.4.2-bookworm
+    container_name: inter_shop_cache_container
+    ports:
+      - "6379:6379"
+
+  inter-payment-server:
+    build: ./inter-payment/inter-payment-server
+    image: inter-payment-server-image
+    container_name: inter_payment_server_container
+    ports:
+      - "8081:8081"
+      - "9081:9081"
+
+  inter-shop-server:
+    build: ./inter-shop
+    image: inter-shop-server-image
+    container_name: inter_shop_server_container
     ports:
       - "8080:8080"
-      - "8081:8081"
+      - "9080:9080"
     environment:
       - SPRING.R2DBC.URL=r2dbc:postgresql://intershop-db:5432/intershop_db
       - SPRING.R2DBC.USERNAME=intershop_user
@@ -25,5 +39,10 @@ services:
       - SPRING.LIQUIBASE.URL=jdbc:postgresql://intershop-db:5432/intershop_db
       - SPRING.LIQUIBASE.USER=intershop_user
       - SPRING.LIQUIBASE.PASSWORD=intershop_password
+      - SPRING.DATA.REDIS.HOST=intershop-redis-cache
+      - SPRING.DATA.REDIS.PORT=6379
+      - INTERPAYMENT.SERVICE.URL=http://inter-payment-server:8081
     depends_on:
       - intershop-db
+      - intershop-redis-cache
+      - inter-payment-server

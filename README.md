@@ -5,12 +5,20 @@
 
 ## Как запускать приложение
 ### без Docker
+#### [inter-shop](inter-shop)
 - создаем базу данных в postgres (см. application.properties)
+- запускаем Redis на порту 6379
 - далее запускаем как стандартное Spring Boot приложение
+#### [inter-payment-server](inter-payment/inter-payment-server)
+- запускаем как стандартное Spring Boot приложение
 
 ### c Docker
 - запускаем команду `docker-compose up`
-- в контейнере поднимается приложение и база данных
+- в контейнере поднимаются:
+  - inter_shop_server_container
+  - inter_shop_db_container
+  - inter_shop_cache_container
+  - inter_payment_server_container
 
 ## Как заполнить базу тестовымы данными
 - используем страничку http://localhost:8080/admin/initial-loader
@@ -26,4 +34,4 @@
 тесты запускаются с использованием testcontainers
 
 ## Схема БД
-![db_schema.png](db_schema.png)
+![db_schema.png](inter-shop/db_schema.png)
