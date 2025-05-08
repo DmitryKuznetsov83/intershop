@@ -6,14 +6,15 @@ import ru.yandex.practicum.intershop.dto.ItemDto;
 import ru.yandex.practicum.intershop.emun.CartAction;
 
 public interface CartService {
-    Mono<Void> changeCart(Long itemId, CartAction operation);
 
-    Flux<ItemDto> getCartItems();
+    Mono<Void> changeCart(Long userId, Long itemId, CartAction operation);
 
-    Mono<Integer> getBalance();
+    Flux<ItemDto> getCartItems(Long userId);
 
-    Mono<Void> clearCart();
+    Mono<Integer> getBalance(Long userId);
 
-    Mono<CartState> getCartState();
+    Mono<Void> clearCart(Long userId);
+
+    Mono<CartState> getCartState(Long userId);
 
 }

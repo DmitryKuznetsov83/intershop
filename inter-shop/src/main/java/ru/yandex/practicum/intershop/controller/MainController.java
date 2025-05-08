@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -19,8 +20,10 @@ import ru.yandex.practicum.intershop.dto.PagingDto;
 import ru.yandex.practicum.intershop.emun.Sorting;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.item.ItemService;
+import ru.yandex.practicum.intershop.service.user.AppUserDetails;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(path = "/main/items")
@@ -39,7 +42,8 @@ public class MainController {
     }
 
     @GetMapping
-    public Mono<String> getItems(Model model,
+    public Mono<String> getItems(@AuthenticationPrincipal AppUserDetails appUserDetails,
+                                 Model model,
                                  @RequestParam(required = false) String search,
                                  @RequestParam(required = false) Sorting sorting,
                                  @RequestParam(required = false) @Positive Integer pageSize,
@@ -58,7 +62,8 @@ public class MainController {
         };
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sort);
 
-        Mono<PageDto<ItemDto>> pageDto = itemService.getItems(pageable, search);
+        Long userId = Optional.ofNullable(appUserDetails).map(AppUserDetails::getId).orElse(null);
+        Mono<PageDto<ItemDto>> pageDto = itemService.getItems(userId, pageable, search);
 
         Mono<List<List<ItemDto>>> partitionedItems = pageDto.map(p -> ListUtils.partition(p.content(), intershopConfiguration.getCellInRow()));
         Integer finalPageSize = pageSize;
@@ -74,9 +79,10 @@ public class MainController {
     }
 
     @PostMapping("/{itemId}")
-    public Mono<String> changeCart(@PathVariable @Positive Long itemId,
+    public Mono<String> changeCart(@AuthenticationPrincipal AppUserDetails appUserDetails,
+                                   @PathVariable @Positive Long itemId,
                                    @Valid @ModelAttribute ChangeCart changeCart) {
-        return cartService.changeCart(itemId, changeCart.getAction())
+        return cartService.changeCart(appUserDetails.getId(), itemId, changeCart.getAction())
                 .then(Mono.just("redirect:/main/items"));
     }
 

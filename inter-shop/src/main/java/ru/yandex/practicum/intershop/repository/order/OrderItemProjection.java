@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 public class OrderItemProjection {
 
+    private Long user_id;
     private Long id;
     private Long order_id;
     private Long item_id;

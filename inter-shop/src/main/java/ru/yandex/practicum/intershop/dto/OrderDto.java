@@ -12,6 +12,7 @@ import java.util.List;
 public class OrderDto {
 
     private Long id;
+    private Long userId;
     private List<ItemDto> items;
 
     public Integer getTotalSum() {

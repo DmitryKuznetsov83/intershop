@@ -1,6 +1,8 @@
 package ru.yandex.practicum.intershop.service.order;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
@@ -31,7 +33,6 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final TransactionalOperator transactionalOperator;
     private final InterPaymentClient interPaymentClient;
-    private final CartRepository cartRepository;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartService cartService, TransactionalOperator transactionalOperator, InterPaymentClient interPaymentClient, CartRepository cartRepository) {
@@ -40,12 +41,12 @@ public class OrderServiceImpl implements OrderService {
         this.cartService = cartService;
         this.transactionalOperator = transactionalOperator;
         this.interPaymentClient = interPaymentClient;
-        this.cartRepository = cartRepository;
     }
 
     @Override
-    public Flux<OrderDto> getOrders() {
-        return orderRepository.findAllOrderItems()
+    @PreAuthorize("#userId == principal.id or hasRole('ADMIN')")
+    public Flux<OrderDto> getOrders(Long userId) {
+        return orderRepository.findAllOrderItems(userId)
                 .groupBy(OrderItemProjection::getOrder_id)
                 .concatMap(groupedFlux ->
                         groupedFlux
@@ -55,18 +56,24 @@ public class OrderServiceImpl implements OrderService {
                                     List<ItemDto> products = orderItems.stream()
                                             .map(ItemMapper.INSTANCE::mapToItemDto)
                                             .toList();
-                                    return new OrderDto(orderId, products);
+                                    return OrderDto.builder()
+                                            .userId(orderItems.getFirst().getUser_id())
+                                            .id(orderId)
+                                            .items(products)
+                                            .build();
                                 })
                 );
     }
 
     @Override
+    @PostAuthorize("returnObject.userId == principal.id or hasRole('ADMIN')")
     public Mono<OrderDto> getOrderById(Long id) {
         return orderRepository.findAllOrderItemsByOrderId(id)
                 .switchIfEmpty(Mono.error(new NoSuchElementException("Заказ с id " + id + " не найден")))
                 .collectList()
                 .flatMap(orderItems -> {
                     OrderDto orderDto = new OrderDto();
+                    orderDto.setUserId(orderItems.getFirst().getUser_id());
                     orderDto.setId(id);
                     orderDto.setItems(orderItems.stream().map(ItemMapper.INSTANCE::mapToItemDto).toList());
                     return Mono.just(orderDto);
@@ -74,9 +81,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Mono<Long> createOrder() {
+    @PreAuthorize("#userId == principal.id or hasRole('ADMIN')")
+    public Mono<Long> createOrder(Long userId) {
 
-        return cartService.getCartState()
+        return cartService.getCartState(userId)
                 .flatMap(cartState -> {
                     if (!cartState.isPaymentServiceAvailable()) {
                         return Mono.error(new IllegalStateException("Платёжный сервис недоступен"));
@@ -89,11 +97,11 @@ public class OrderServiceImpl implements OrderService {
                 .map(CartState::getCartSum)
                 .flatMap(sum -> interPaymentClient.payment(sum)
                         .then(transactionalOperator.transactional(
-                                cartService.getCartItems()
+                                cartService.getCartItems(userId)
                                         .switchIfEmpty(Mono.error(new EmptyCartException()))
                                         .collectList()
                                         .flatMap(cartItems -> {
-                                            Order newOrder = new Order();
+                                            Order newOrder = new Order(userId);
                                             return orderRepository.save(newOrder)
                                                     .flatMap(order -> {
                                                         List<OrderItem> orderItems = cartItems.stream()
@@ -106,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
                                                                 })
                                                                 .toList();
                                                         return orderItemRepository.saveAll(orderItems)
-                                                                .then(cartService.clearCart())
+                                                                .then(cartService.clearCart(userId))
                                                                 .then(Mono.just(order.getId()));
                                                     });
                                         })
@@ -116,10 +124,11 @@ public class OrderServiceImpl implements OrderService {
                     if (e instanceof LackOfFundsException || e instanceof IllegalStateException) {
                         return Mono.error(e);
                     }
-                    return cartService.getCartState()
+                    return cartService.getCartState(userId)
                             .map(CartState::getCartSum)
                             .flatMap(sum -> interPaymentClient.topUp(sum)
                                     .then(Mono.error(e)));
                 });
     }
+
 }

@@ -8,10 +8,13 @@ import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.r2dbc.core.DatabaseClient;
 import ru.yandex.practicum.intershop.SpringBootPostgreSQLBase;
+import ru.yandex.practicum.intershop.emun.AppUserRole;
+import ru.yandex.practicum.intershop.model.AppUser;
 import ru.yandex.practicum.intershop.model.CartItem;
 import ru.yandex.practicum.intershop.model.Item;
 import ru.yandex.practicum.intershop.repository.cart.CartRepository;
 import ru.yandex.practicum.intershop.repository.item.ItemRepository;
+import ru.yandex.practicum.intershop.repository.user.AppUserRepository;
 import ru.yandex.practicum.intershop.service.initial_loader.InitialLoaderServiceImpl;
 
 import java.util.List;
@@ -31,22 +34,35 @@ public class ItemRepositoryTest extends SpringBootPostgreSQLBase {
     private CartRepository cartRepository;
 
     @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Autowired
     private InitialLoaderServiceImpl initialLoaderService;
 
     @BeforeEach
     public void setUp() {
-        databaseClient.sql("TRUNCATE TABLE order_item, orders, cart_item, item CASCADE;").then().block();
+        databaseClient.sql("TRUNCATE TABLE order_item, orders, cart_item, item, app_user CASCADE;").then().block();
         initialLoaderService.load().block();
     }
 
     @Test
     void cartQuantityTest() {
+
+        AppUser testClient = AppUser.builder()
+                .login("test_client")
+                .password("test_password")
+                .role(AppUserRole.ROLE_CLIENT)
+                .build();
+
+        AppUser savedUser = appUserRepository.save(testClient).block();
+        Long savedUserId = savedUser.getId();
+
         List<Item> allItems = itemRepository.findAll().collectList().block();
         Long itemId = allItems.get(0).getId();
 
-        cartRepository.insert(itemId, 3).block();
+        cartRepository.insert(savedUser.getId(), itemId, 3).block();
 
-        Assertions.assertThat(cartRepository.findById(itemId).block())
+        Assertions.assertThat(cartRepository.findByUserIdAndItemId(savedUserId, itemId).block())
                 .withFailMessage("Должна сохраняться позиция в корзине")
                 .isNotNull()
                 .withFailMessage("Количество должно быть 3")
