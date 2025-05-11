@@ -2,6 +2,8 @@ package ru.yandex.practicum.intershop.service.cart;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -14,6 +16,7 @@ import ru.yandex.practicum.intershop.repository.cart.CartRepository;
 import ru.yandex.practicum.intershop.repository.item.ItemRepository;
 import ru.yandex.practicum.intershop.repository.user.AppUserRepository;
 
+import java.security.Principal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -77,7 +80,10 @@ public class CartServiceImpl implements CartService {
     @Override
     @PreAuthorize("#userId == principal.id or hasRole('ADMIN')")
     public Mono<Integer> getBalance(Long userId) {
-        return interPaymentClient.getBalance();
+        Mono<String> userLogin = ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Principal::getName);
+        return interPaymentClient.getBalance(userLogin);
     }
 
     @Override

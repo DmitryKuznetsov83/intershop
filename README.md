@@ -8,6 +8,7 @@
 #### [inter-shop](inter-shop)
 - создаем базу данных в postgres (см. application.properties)
 - запускаем Redis на порту 6379
+- запускаем keycloak, добавляем клиента inter-shop, указываем секрет в spring.security.oauth2.client.registration.inter-shop.client-secret 
 - далее запускаем как стандартное Spring Boot приложение
 #### [inter-payment-server](inter-payment/inter-payment-server)
 - запускаем как стандартное Spring Boot приложение
@@ -15,6 +16,7 @@
 ### c Docker
 - запускаем команду `docker-compose up`
 - в контейнере поднимаются:
+  - keycloak с импортом настроек клиента
   - inter_shop_server_container
   - inter_shop_db_container
   - inter_shop_cache_container

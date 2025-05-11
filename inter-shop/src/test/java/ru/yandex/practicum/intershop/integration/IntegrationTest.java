@@ -3,6 +3,8 @@ package ru.yandex.practicum.intershop.integration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -11,12 +13,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+import ru.yandex.practicum.client.InterPaymentClient;
+import ru.yandex.practicum.client.InterPaymentClientConfig;
 import ru.yandex.practicum.intershop.SpringBootPostgreSQLBase;
 import ru.yandex.practicum.intershop.emun.AppUserRole;
-import ru.yandex.practicum.intershop.emun.CartAction;
 import ru.yandex.practicum.intershop.model.AppUser;
 import ru.yandex.practicum.intershop.repository.cart.CartRepository;
 import ru.yandex.practicum.intershop.repository.item.ItemRepository;
@@ -28,10 +32,15 @@ import ru.yandex.practicum.intershop.service.user.AppUserDetails;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static ru.yandex.practicum.intershop.emun.AppUserRole.ROLE_ADMIN;
+import static ru.yandex.practicum.intershop.emun.CartAction.*;
 
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@ImportAutoConfiguration(exclude = {
+        ReactiveOAuth2ClientAutoConfiguration.class,
+        InterPaymentClientConfig.class
+})
 public class IntegrationTest extends SpringBootPostgreSQLBase {
 
     @Autowired
@@ -57,6 +66,10 @@ public class IntegrationTest extends SpringBootPostgreSQLBase {
 
     @MockitoSpyBean
     private CartRepository cartRepository;
+
+    @MockitoBean
+    private InterPaymentClient interPaymentClientMock;
+
 
     @BeforeEach
     void setUp() {
@@ -126,8 +139,8 @@ public class IntegrationTest extends SpringBootPostgreSQLBase {
                 .exchange()
                 .expectStatus().is3xxRedirection();
 
-        // проверим вызовы
-        verify(cartService, times(1)).changeCart(userId, itemId, CartAction.PLUS);
+       // проверим вызовы
+        verify(cartService, times(1)).changeCart(userId, itemId, PLUS);
         verify(cartRepository, times(1)).insert(userId, itemId, 1);
 
     }

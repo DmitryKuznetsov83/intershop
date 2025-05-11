@@ -1,6 +1,22 @@
 version: '3.1'
 services:
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.3
+    container_name: keycloak
+    ports:
+      - "8082:8080"
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    command:
+      - start-dev
+      - --import-realm
+      - /opt/keycloak/data/import/realm-export.json
+
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+
   intershop-db:
     image: postgres:17-alpine
     container_name: inter_shop_db_container
@@ -24,6 +40,10 @@ services:
     ports:
       - "8081:8081"
       - "9081:9081"
+    environment:
+     - SPRING.SECURITY.OAUTH2.RESOURCESERVER.JWT.ISSUER-URI=http://keycloak:8080/realms/master
+    depends_on:
+      - keycloak
 
   inter-shop-server:
     build: ./inter-shop
@@ -42,7 +62,14 @@ services:
       - SPRING.DATA.REDIS.HOST=intershop-redis-cache
       - SPRING.DATA.REDIS.PORT=6379
       - INTERPAYMENT.SERVICE.URL=http://inter-payment-server:8081
+      - SPRING.SECURITY.OAUTH2.CLIENT.PROVIDER.KEYCLOAK.ISSUER-URI=http://keycloak:8080/realms/master
+    restart: unless-stopped
     depends_on:
-      - intershop-db
-      - intershop-redis-cache
-      - inter-payment-server
+      keycloak:
+         condition: service_started
+      intershop-db:
+        condition: service_started
+      intershop-redis-cache:
+        condition: service_started
+      inter-payment-server:
+        condition: service_started

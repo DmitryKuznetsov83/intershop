@@ -3,6 +3,8 @@ package ru.yandex.practicum.intershop.service.order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
@@ -22,6 +24,7 @@ import ru.yandex.practicum.intershop.repository.order.OrderRepository;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.cart.CartState;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -84,6 +87,10 @@ public class OrderServiceImpl implements OrderService {
     @PreAuthorize("#userId == principal.id or hasRole('ADMIN')")
     public Mono<Long> createOrder(Long userId) {
 
+        Mono<String> userLogin = ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Principal::getName);
+
         return cartService.getCartState(userId)
                 .flatMap(cartState -> {
                     if (!cartState.isPaymentServiceAvailable()) {
@@ -95,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
                     return Mono.just(cartState);
                 })
                 .map(CartState::getCartSum)
-                .flatMap(sum -> interPaymentClient.payment(sum)
+                .flatMap(sum -> interPaymentClient.payment(userLogin, sum)
                         .then(transactionalOperator.transactional(
                                 cartService.getCartItems(userId)
                                         .switchIfEmpty(Mono.error(new EmptyCartException()))
@@ -126,7 +133,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                     return cartService.getCartState(userId)
                             .map(CartState::getCartSum)
-                            .flatMap(sum -> interPaymentClient.topUp(sum)
+                            .flatMap(sum -> interPaymentClient.topUp(userLogin, sum)
                                     .then(Mono.error(e)));
                 });
     }
