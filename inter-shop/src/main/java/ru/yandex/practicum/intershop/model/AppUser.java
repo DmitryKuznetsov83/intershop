@@ -1,23 +1,25 @@
 package ru.yandex.practicum.intershop.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+import ru.yandex.practicum.intershop.emun.AppUserRole;
 
-@Table(name="orders")
+@Table(name="app_user")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Order {
+@AllArgsConstructor
+@Builder
+public class AppUser {
 
     @Id
     private Long id;
 
-    private Long userId;
+    String login;
 
-    public Order(Long userId) {
-        this.userId = userId;
-    }
+    String password;
+
+    AppUserRole role;
+
 }

@@ -7,9 +7,9 @@ import ru.yandex.practicum.intershop.dto.PageDto;
 
 public interface ItemService {
 
-    Mono<PageDto<ItemDto>> getItems(Pageable pageable, String search);
+    Mono<PageDto<ItemDto>> getItems(Long userId, Pageable pageable, String search);
 
-    Mono<ItemDto> getItemById(Long id);
+    Mono<ItemDto> getItemById(Long userId, Long id);
 
     Mono<Long> getItemCount(boolean forceCacheRefresh);
 

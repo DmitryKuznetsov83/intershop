@@ -25,7 +25,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Mono<PageDto<ItemDto>> getItems(Pageable pageable, String searchRaw) {
+    public Mono<PageDto<ItemDto>> getItems(Long userId, Pageable pageable, String searchRaw) {
         String search;
         if (StringUtils.isNullOrBlank(searchRaw)) {
             search = null;
@@ -36,8 +36,11 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper.INSTANCE::mapToItemDto)
                 .collectList()
                 .flatMap(itemDtoList -> {
+                    if (userId == null) {
+                        return Mono.just(itemDtoList);
+                    }
                     return cartRepository
-                            .findAllById(itemDtoList
+                            .findAllByUserIdAndItemIdIn(userId, itemDtoList
                                     .stream()
                                     .map(ItemDto::getId)
                                     .toList())
@@ -63,9 +66,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Mono<ItemDto> getItemById(Long id) {
-        return Mono.zip(itemCacheService.getItemById(id),
-                        cartRepository.findById(id)
+    public Mono<ItemDto> getItemById(Long userId, Long itemId) {
+        if (userId == null) {
+            return itemCacheService.getItemById(itemId)
+                    .map(ItemMapper.INSTANCE::mapToItemDto);
+        }
+
+        return Mono.zip(itemCacheService.getItemById(itemId),
+                        cartRepository.findByUserIdAndItemId(userId, itemId)
                                 .defaultIfEmpty(CartItem.getEmptyCartPosition()))
                 .map(tuple -> {
                     ItemDto itemDto = ItemMapper.INSTANCE.mapToItemDto(tuple.getT1());

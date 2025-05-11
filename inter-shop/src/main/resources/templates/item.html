@@ -7,6 +7,15 @@
 </head>
 
 <body>
+    <a href="/login" style="float:right;">
+        <b th:if="${!user.isAuthorized}">login&cudarrr;</b>
+    </a>
+    <a href="/logout" style="float:right;">
+        <b th:if="${user.isAuthorized}">logout&cudarrr;</b>
+    </a>
+    <a href="" style="float:right;">
+        <b th:text="${user.login} + '&cudarrr;'"></b>
+    </a>
     <a href="/orders" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
@@ -27,7 +36,7 @@
         <p>
             <span th:text="${item.getDescription()}"></span>
         </p>
-        <form th:action="${'/items/'+item.getId()}" method="post">
+        <form th:if="${user.isAuthorized}" th:action="${'/items/'+item.getId()}" method="post">
             <button name="action" value="minus">-</button>
             <span th:text="${item.getQuantity()}"></span>
             <button name="action" value="plus">+</button>

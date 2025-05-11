@@ -5,6 +5,7 @@ import com.opencsv.exceptions.CsvException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Mono;
@@ -32,12 +33,14 @@ public class InitialLoaderServiceImpl implements InitialLoaderService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Void> load() {
         return itemRepository.saveAll(createItems())
                 .then();
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<Long> getItemCount() {
         return Mono.just((long) getCsvRows().size() - 1);
     }

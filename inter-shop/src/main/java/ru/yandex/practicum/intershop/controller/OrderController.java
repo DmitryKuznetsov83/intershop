@@ -2,6 +2,7 @@ package ru.yandex.practicum.intershop.controller;
 
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.dto.OrderDto;
 import ru.yandex.practicum.intershop.service.order.OrderService;
+import ru.yandex.practicum.intershop.service.user.AppUserDetails;
 
 @Controller
 @RequestMapping(path = "/orders")
@@ -27,8 +29,9 @@ public class OrderController {
     }
 
     @GetMapping
-    public Mono<String> getOrders(Model model) {
-        Flux<OrderDto> orders = orderService.getOrders();
+    public Mono<String> getOrders(@AuthenticationPrincipal AppUserDetails appUserDetails,
+                                  Model model) {
+        Flux<OrderDto> orders = orderService.getOrders(appUserDetails.getId());
         model.addAttribute("orders", orders);
         return Mono.just("orders");
     }

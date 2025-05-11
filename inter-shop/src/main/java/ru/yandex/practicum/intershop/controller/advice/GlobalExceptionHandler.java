@@ -1,7 +1,9 @@
-package ru.yandex.practicum.intershop.controller;
+package ru.yandex.practicum.intershop.controller.advice;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +50,20 @@ public class GlobalExceptionHandler {
     public Mono<String> handleNoSuchElementException(NoSuchElementException ex, Model model) {
         model.addAttribute("error","Страница не найдена: " + ex.getMessage());
         return Mono.just("page-404.html");
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Mono<String> handleAuthorizationDeniedException(AuthorizationDeniedException ex, Model model) {
+        model.addAttribute("error","Вам запрещен доступ к ресурсу");
+        return Mono.just("page-403.html");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Mono<String> handleAccessDeniedException(AccessDeniedException ex, Model model) {
+        model.addAttribute("error","Вам запрещен доступ к ресурсу");
+        return Mono.just("page-403.html");
     }
 
     @ExceptionHandler(Throwable.class)

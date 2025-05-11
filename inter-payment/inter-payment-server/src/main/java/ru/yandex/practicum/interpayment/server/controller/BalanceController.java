@@ -24,14 +24,14 @@ public class BalanceController {
         this.balanceService = balanceService;
     }
 
-    @GetMapping
-    public Mono<BalanceDto> getBalance() {
-        return balanceService.getBalance();
+    @GetMapping("/{userLogin}")
+    public Mono<BalanceDto> getBalance(@PathVariable String userLogin) {
+        return balanceService.getBalance(userLogin);
     }
 
-    @PostMapping
-    public Mono<BalanceDto> changeBalance(@RequestBody @Validated TransactionDto transactionDto) {
-        return balanceService.changeBalance(transactionDto);
+    @PostMapping("/{userLogin}")
+    public Mono<BalanceDto> changeBalance(@PathVariable String userLogin, @RequestBody @Validated TransactionDto transactionDto) {
+        return balanceService.changeBalance(userLogin, transactionDto);
     }
 
     @ExceptionHandler({RepeatTransactionException.class})

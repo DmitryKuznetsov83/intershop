@@ -3,6 +3,7 @@ package ru.yandex.practicum.intershop.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import ru.yandex.practicum.intershop.service.cart.CartService;
 import ru.yandex.practicum.intershop.service.cart.CartState;
+import ru.yandex.practicum.intershop.service.user.AppUserDetails;
 
 @Controller
 @RequestMapping("/cart/items")
@@ -24,8 +26,9 @@ public class CartController {
     }
 
     @GetMapping
-    public Mono<String> getCart(Model model) {
-        Mono<CartState> cartState = cartService.getCartState();
+    public Mono<String> getCart(@AuthenticationPrincipal AppUserDetails appUserDetails,
+                                Model model) {
+        Mono<CartState> cartState = cartService.getCartState(appUserDetails.getId());
 
         model.addAttribute("items",                     cartState.map(CartState::getItems));
         model.addAttribute("empty",                     cartState.map(CartState::isEmpty));
@@ -39,9 +42,10 @@ public class CartController {
     }
 
     @PostMapping("/{itemId}")
-    public Mono<String> changeCart(@PathVariable @Positive Long itemId,
+    public Mono<String> changeCart(@AuthenticationPrincipal AppUserDetails appUserDetails,
+                                   @PathVariable @Positive Long itemId,
                                    @Valid @ModelAttribute ChangeCart changeCart) {
-        return cartService.changeCart(itemId, changeCart.getAction())
+        return cartService.changeCart(appUserDetails.getId(), itemId, changeCart.getAction())
                 .then(Mono.just("redirect:/cart/items"));
     }
 
